@@ -32,45 +32,68 @@ CARREGAR DADOS DO BANCO
 
 async function carregarDados() {
 
-const { data: dadosRegistros, error: erroRegistros } =
-    await db
-        .from("registros")
-        .select("*")
-        .order("id", { ascending: true });
+    try {
 
-if (erroRegistros) {
+        console.log("Iniciando carregamento...");
 
-    console.error(
-        "Erro ao carregar registros:",
-        erroRegistros
-    );
+        const {
+            data: dadosRegistros,
+            error: erroRegistros
+        } = await db
+            .from("registros")
+            .select("*")
+            .order("id", { ascending: true });
 
-    alert(
-        "Não foi possível carregar os registros do banco de dados."
-    );
+        if (erroRegistros) {
 
-    return;
+            console.error(
+                "Erro em registros:",
+                erroRegistros
+            );
+
+            return;
+        }
+
+        const {
+            data: dadosColaboradores,
+            error: erroColaboradores
+        } = await db
+            .from("colaboradores")
+            .select("*")
+            .order("id", { ascending: true });
+
+        if (erroColaboradores) {
+
+            console.error(
+                "Erro em colaboradores:",
+                erroColaboradores
+            );
+
+            return;
+        }
+
+        registros = dadosRegistros || [];
+
+        colaboradores = dadosColaboradores || [];
+
+        console.log("Registros:", registros);
+        console.log("Colaboradores:", colaboradores);
+
+        atualizarDashboard();
+
+        console.log("Dashboard atualizado.");
+
+    } catch (erro) {
+
+        console.error(
+            "Erro inesperado ao carregar dados:",
+            erro
+        );
+
+    }
+
 }
 
-const { data: dadosColaboradores, error: erroColaboradores } =
-    await db
-        .from("colaboradores")
-        .select("*")
-        .order("id", { ascending: true });
-
-if (erroColaboradores) {
-
-    console.error(
-        "Erro ao carregar colaboradores:",
-        erroColaboradores
-    );
-
-    alert(
-        "Não foi possível carregar os colaboradores do banco de dados."
-    );
-
-    return;
-}
 
 registros = dadosRegistros || [];
 
@@ -1833,12 +1856,27 @@ document.addEventListener(
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
+document.addEventListener("DOMContentLoaded", async () => {
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+    console.log("Site carregado.");
+
+    try {
 
         await carregarDados();
+
+        console.log("Dados carregados com sucesso.");
+
+    } catch (erro) {
+
+        console.error(
+            "Erro durante a inicialização:",
+            erro
+        );
+
+    }
+
+});
+
 
     }
 );
