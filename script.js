@@ -2,13 +2,13 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "https://dfqclkfqdzfsftnmzejx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_IV8xYF0qDVVYAxhSgSjqtg_mreIReGf";
+const SUPABASE_URL =
+    "https://dfqclkfqdzfsftnmzejx.supabase.co";
 
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
+const SUPABASE_ANON_KEY =
+    "sb_publishable_IV8xYF0qDVVYAxhSgSjqtg_mreIReGf";
+
+let db = null;
 
 
 /* =========================================================
@@ -29,14 +29,62 @@ let paginaHistoricoAtual = 1;
 
 
 /* =========================================================
+   INICIALIZAR SUPABASE
+========================================================= */
+
+function inicializarSupabase() {
+
+    if (
+        !window.supabase ||
+        typeof window.supabase.createClient !== "function"
+    ) {
+
+        console.error(
+            "ERRO: biblioteca do Supabase não foi carregada."
+        );
+
+        return false;
+    }
+
+    db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
+    console.log(
+        "Supabase conectado com sucesso."
+    );
+
+    return true;
+}
+
+
+/* =========================================================
    CARREGAR DADOS DO BANCO
 ========================================================= */
 
 async function carregarDados() {
 
+    if (!db) {
+
+        console.error(
+            "Supabase não inicializado."
+        );
+
+        return;
+
+    }
+
     try {
 
-        console.log("Iniciando carregamento...");
+        console.log(
+            "Iniciando carregamento dos dados..."
+        );
+
+
+        /* =================================================
+           REGISTROS
+        ================================================= */
 
         const {
             data: dadosRegistros,
@@ -48,6 +96,7 @@ async function carregarDados() {
                 ascending: true
             });
 
+
         if (erroRegistros) {
 
             console.error(
@@ -55,11 +104,18 @@ async function carregarDados() {
                 erroRegistros
             );
 
-            alert("Erro ao carregar os registros.");
+            alert(
+                "Erro ao carregar os registros."
+            );
 
             return;
 
         }
+
+
+        /* =================================================
+           COLABORADORES
+        ================================================= */
 
         const {
             data: dadosColaboradores,
@@ -71,6 +127,7 @@ async function carregarDados() {
                 ascending: true
             });
 
+
         if (erroColaboradores) {
 
             console.error(
@@ -78,34 +135,49 @@ async function carregarDados() {
                 erroColaboradores
             );
 
-            alert("Erro ao carregar os colaboradores.");
+            alert(
+                "Erro ao carregar os colaboradores."
+            );
 
             return;
 
         }
 
-        registros = dadosRegistros || [];
 
-        colaboradores = dadosColaboradores || [];
+        /* =================================================
+           SALVAR DADOS
+        ================================================= */
 
-        console.log("Registros:", registros);
+        registros =
+            dadosRegistros || [];
+
+        colaboradores =
+            dadosColaboradores || [];
+
 
         console.log(
-            "Colaboradores:",
-            colaboradores
+            "Registros carregados:",
+            registros.length
         );
+
+        console.log(
+            "Colaboradores carregados:",
+            colaboradores.length
+        );
+
 
         atualizarDashboard();
 
-        console.log(
-            "Dashboard atualizado."
-        );
-
-    } catch (erro) {
+    }
+    catch (erro) {
 
         console.error(
             "Erro inesperado ao carregar dados:",
             erro
+        );
+
+        alert(
+            "Não foi possível carregar os dados do sistema."
         );
 
     }
@@ -117,52 +189,81 @@ async function carregarDados() {
    NAVEGAÇÃO
 ========================================================= */
 
-function mostrarPagina(pagina, botao) {
+function mostrarPagina(
+    pagina,
+    botao
+) {
 
     document
         .querySelectorAll(".pagina")
         .forEach(section => {
 
-            section.classList.remove("active");
+            section.classList.remove(
+                "active"
+            );
 
         });
+
 
     document
         .querySelectorAll(".menu-btn")
         .forEach(button => {
 
-            button.classList.remove("active");
+            button.classList.remove(
+                "active"
+            );
 
         });
 
+
     const paginaElemento =
-        document.getElementById(pagina);
+        document.getElementById(
+            pagina
+        );
+
 
     if (paginaElemento) {
 
-        paginaElemento.classList.add("active");
+        paginaElemento.classList.add(
+            "active"
+        );
 
     }
+
 
     if (botao) {
 
-        botao.classList.add("active");
+        botao.classList.add(
+            "active"
+        );
 
     }
 
-    if (pagina === "dashboard") {
+
+    if (
+        pagina ===
+        "dashboard"
+    ) {
 
         atualizarDashboard();
 
     }
 
-    if (pagina === "colaboradores") {
+
+    if (
+        pagina ===
+        "colaboradores"
+    ) {
 
         carregarColaboradores();
 
     }
 
-    if (pagina === "historico") {
+
+    if (
+        pagina ===
+        "historico"
+    ) {
 
         paginaHistoricoAtual = 1;
 
@@ -180,16 +281,25 @@ function mostrarPagina(pagina, botao) {
 async function cadastrarColaborador() {
 
     const campoLms =
-        document.getElementById("cadastroLms");
+        document.getElementById(
+            "cadastroLms"
+        );
 
     const campoNome =
-        document.getElementById("cadastroNome");
+        document.getElementById(
+            "cadastroNome"
+        );
 
-    if (!campoLms || !campoNome) {
+
+    if (
+        !campoLms ||
+        !campoNome
+    ) {
 
         return;
 
     }
+
 
     const lms =
         campoLms.value.trim();
@@ -197,7 +307,11 @@ async function cadastrarColaborador() {
     const nome =
         campoNome.value.trim();
 
-    if (!lms || !nome) {
+
+    if (
+        !lms ||
+        !nome
+    ) {
 
         alert(
             "Preencha o LMS e o nome do colaborador."
@@ -207,12 +321,18 @@ async function cadastrarColaborador() {
 
     }
 
+
     const existente =
         colaboradores.find(
             colaborador =>
-                normalizarTexto(colaborador.lms) ===
-                normalizarTexto(lms)
+                normalizarTexto(
+                    colaborador.lms
+                ) ===
+                normalizarTexto(
+                    lms
+                )
         );
+
 
     if (existente) {
 
@@ -223,6 +343,7 @@ async function cadastrarColaborador() {
         return;
 
     }
+
 
     const {
         data,
@@ -237,6 +358,7 @@ async function cadastrarColaborador() {
         ])
         .select()
         .single();
+
 
     if (error) {
 
@@ -253,11 +375,16 @@ async function cadastrarColaborador() {
 
     }
 
-    colaboradores.push(data);
+
+    colaboradores.push(
+        data
+    );
+
 
     campoLms.value = "";
 
     campoNome.value = "";
+
 
     await carregarColaboradores();
 
@@ -280,14 +407,22 @@ async function carregarColaboradores() {
             "tabelaColaboradores"
         );
 
-    if (!campo || !tabela) {
+
+    if (
+        !campo ||
+        !tabela
+    ) {
 
         return;
 
     }
 
+
     const termo =
-        normalizarTexto(campo.value);
+        normalizarTexto(
+            campo.value
+        );
+
 
     const {
         data,
@@ -298,6 +433,7 @@ async function carregarColaboradores() {
         .order("id", {
             ascending: true
         });
+
 
     if (error) {
 
@@ -310,9 +446,14 @@ async function carregarColaboradores() {
 
     }
 
-    colaboradores = data || [];
 
-    let lista = colaboradores;
+    colaboradores =
+        data || [];
+
+
+    let lista =
+        colaboradores;
+
 
     if (termo) {
 
@@ -322,16 +463,21 @@ async function carregarColaboradores() {
 
                     normalizarTexto(
                         colaborador.lms
-                    ).includes(termo)
+                    ).includes(
+                        termo
+                    )
 
                     ||
 
                     normalizarTexto(
                         colaborador.nome
-                    ).includes(termo)
+                    ).includes(
+                        termo
+                    )
             );
 
     }
+
 
     if (!lista.length) {
 
@@ -351,34 +497,44 @@ async function carregarColaboradores() {
 
     }
 
+
     tabela.innerHTML =
         lista
             .slice()
             .reverse()
-            .map(colaborador => `
+            .map(
+                colaborador => `
 
                 <tr>
 
                     <td>
-                        ${escaparHTML(colaborador.lms)}
+                        ${escaparHTML(
+                            colaborador.lms
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(colaborador.nome)}
+                        ${escaparHTML(
+                            colaborador.nome
+                        )}
                     </td>
 
                     <td>
 
                         <button
                             class="btn-editar"
-                            onclick="abrirEdicaoColaborador(${Number(colaborador.id)})"
+                            onclick="abrirEdicaoColaborador(${Number(
+                                colaborador.id
+                            )})"
                         >
                             Editar
                         </button>
 
                         <button
                             class="btn-excluir"
-                            onclick="excluirColaborador(${Number(colaborador.id)})"
+                            onclick="excluirColaborador(${Number(
+                                colaborador.id
+                            )})"
                         >
                             Excluir
                         </button>
@@ -387,7 +543,8 @@ async function carregarColaboradores() {
 
                 </tr>
 
-            `)
+            `
+            )
             .join("");
 
 }
@@ -404,7 +561,13 @@ function mostrarTodosColaboradores() {
             "buscaColaborador"
         );
 
-    if (!campo) return;
+
+    if (!campo) {
+
+        return;
+
+    }
+
 
     campo.value = "";
 
@@ -420,22 +583,37 @@ function mostrarTodosColaboradores() {
 function buscarNomePorLms() {
 
     const campoLms =
-        document.getElementById("lms");
+        document.getElementById(
+            "lms"
+        );
 
     const campoNome =
-        document.getElementById("nome");
+        document.getElementById(
+            "nome"
+        );
 
     const status =
-        document.getElementById("statusLms");
+        document.getElementById(
+            "statusLms"
+        );
 
-    if (!campoLms || !campoNome || !status) {
+
+    if (
+        !campoLms ||
+        !campoNome ||
+        !status
+    ) {
 
         return;
 
     }
 
+
     const lms =
-        normalizarTexto(campoLms.value);
+        normalizarTexto(
+            campoLms.value
+        );
+
 
     campoNome.value = "";
 
@@ -444,17 +622,23 @@ function buscarNomePorLms() {
     status.className =
         "status-lms";
 
+
     if (!lms) {
 
         return;
 
     }
 
+
     const colaborador =
         colaboradores.find(
             item =>
-                normalizarTexto(item.lms) === lms
+                normalizarTexto(
+                    item.lms
+                ) ===
+                lms
         );
+
 
     if (colaborador) {
 
@@ -468,7 +652,8 @@ function buscarNomePorLms() {
             "sucesso"
         );
 
-    } else {
+    }
+    else {
 
         status.textContent =
             "LMS não cadastrado";
@@ -489,16 +674,25 @@ function buscarNomePorLms() {
 async function registrarRetirada() {
 
     const campoLms =
-        document.getElementById("lms");
+        document.getElementById(
+            "lms"
+        );
 
     const campoNome =
-        document.getElementById("nome");
+        document.getElementById(
+            "nome"
+        );
 
     const campoCodigo =
-        document.getElementById("codigo");
+        document.getElementById(
+            "codigo"
+        );
 
     const campoObservacao =
-        document.getElementById("observacao");
+        document.getElementById(
+            "observacao"
+        );
+
 
     if (
         !campoLms ||
@@ -510,6 +704,7 @@ async function registrarRetirada() {
         return;
 
     }
+
 
     const lms =
         campoLms.value.trim();
@@ -524,11 +719,10 @@ async function registrarRetirada() {
         campoObservacao.value.trim();
 
 
-    /* =====================================================
-       VALIDAÇÃO
-    ===================================================== */
-
-    if (!lms || !codigo) {
+    if (
+        !lms ||
+        !codigo
+    ) {
 
         alert(
             "Preencha o LMS e o código do equipamento."
@@ -537,6 +731,7 @@ async function registrarRetirada() {
         return;
 
     }
+
 
     if (!nome) {
 
@@ -549,16 +744,17 @@ async function registrarRetirada() {
     }
 
 
-    /* =====================================================
-       CONFIRMAR COLABORADOR
-    ===================================================== */
-
     const colaborador =
         colaboradores.find(
             item =>
-                normalizarTexto(item.lms) ===
-                normalizarTexto(lms)
+                normalizarTexto(
+                    item.lms
+                ) ===
+                normalizarTexto(
+                    lms
+                )
         );
+
 
     if (!colaborador) {
 
@@ -571,27 +767,32 @@ async function registrarRetirada() {
     }
 
 
-    /* =====================================================
-       GARANTIR NOME ATUAL
-    ===================================================== */
-
     const nomeColaborador =
         colaborador.nome;
 
 
-    /* =====================================================
+    /* =================================================
        VERIFICAR EQUIPAMENTO JÁ RETIRADO
-    ===================================================== */
+    ================================================= */
 
     const {
         data: equipamentoExistente,
         error: erroBusca
     } = await db
         .from("registros")
-        .select("id, codigo, status")
-        .ilike("codigo", codigo)
-        .eq("status", "retirado")
+        .select(
+            "id, codigo, status"
+        )
+        .ilike(
+            "codigo",
+            codigo
+        )
+        .eq(
+            "status",
+            "retirado"
+        )
         .limit(1);
+
 
     if (erroBusca) {
 
@@ -608,6 +809,7 @@ async function registrarRetirada() {
 
     }
 
+
     if (
         equipamentoExistente &&
         equipamentoExistente.length > 0
@@ -622,9 +824,9 @@ async function registrarRetirada() {
     }
 
 
-    /* =====================================================
+    /* =================================================
        SALVAR NO SUPABASE
-    ===================================================== */
+    ================================================= */
 
     const {
         data,
@@ -633,19 +835,31 @@ async function registrarRetirada() {
         .from("registros")
         .insert([
             {
-                lms: colaborador.lms,
-                nome: nomeColaborador,
-                codigo: codigo,
+                lms:
+                    colaborador.lms,
+
+                nome:
+                    nomeColaborador,
+
+                codigo:
+                    codigo,
+
                 observacao:
                     observacao || null,
+
                 retirada:
                     new Date().toISOString(),
-                devolucao: null,
-                status: "retirado"
+
+                devolucao:
+                    null,
+
+                status:
+                    "retirado"
             }
         ])
         .select()
         .single();
+
 
     if (error) {
 
@@ -654,21 +868,18 @@ async function registrarRetirada() {
             error
         );
 
-        /*
-         * Caso exista uma restrição UNIQUE
-         * no banco para impedir equipamento
-         * duplicado como retirado.
-         */
 
         if (
-            error.code === "23505"
+            error.code ===
+            "23505"
         ) {
 
             alert(
                 "Este equipamento já está registrado como retirado."
             );
 
-        } else {
+        }
+        else {
 
             alert(
                 "Erro ao registrar a retirada."
@@ -687,9 +898,9 @@ async function registrarRetirada() {
     );
 
 
-    /* =====================================================
+    /* =================================================
        ATUALIZAR ARRAY LOCAL
-    ===================================================== */
+    ================================================= */
 
     const indiceExistente =
         registros.findIndex(
@@ -698,37 +909,37 @@ async function registrarRetirada() {
                 Number(data.id)
         );
 
-    if (indiceExistente === -1) {
 
-        registros.push(data);
+    if (
+        indiceExistente ===
+        -1
+    ) {
 
-    } else {
+        registros.push(
+            data
+        );
 
-        registros[indiceExistente] =
-            data;
+    }
+    else {
+
+        registros[
+            indiceExistente
+        ] = data;
 
     }
 
 
-    /* =====================================================
-       ATUALIZAR DASHBOARD
-    ===================================================== */
-
     atualizarDashboard();
 
-
-    /* =====================================================
-       ATUALIZAR HISTÓRICO
-    ===================================================== */
 
     paginaHistoricoAtual = 1;
 
     await carregarHistorico();
 
 
-    /* =====================================================
+    /* =================================================
        LIMPAR FORMULÁRIO
-    ===================================================== */
+    ================================================= */
 
     campoLms.value = "";
 
@@ -738,10 +949,12 @@ async function registrarRetirada() {
 
     campoObservacao.value = "";
 
+
     const statusLms =
         document.getElementById(
             "statusLms"
         );
+
 
     if (statusLms) {
 
@@ -753,14 +966,15 @@ async function registrarRetirada() {
     }
 
 
-    /* =====================================================
+    /* =================================================
        MENSAGEM DE SUCESSO
-    ===================================================== */
+    ================================================= */
 
     const mensagem =
         document.getElementById(
             "mensagemRetirada"
         );
+
 
     if (mensagem) {
 
@@ -775,25 +989,27 @@ async function registrarRetirada() {
                 Equipamento:
 
                 <strong>
-                    ${escaparHTML(data.codigo)}
+                    ${escaparHTML(
+                        data.codigo
+                    )}
                 </strong>
 
             </div>
 
         `;
 
-        setTimeout(() => {
 
-            mensagem.innerHTML = "";
+        setTimeout(
+            () => {
 
-        }, 2000);
+                mensagem.innerHTML = "";
+
+            },
+            2000
+        );
 
     }
 
-
-    /* =====================================================
-       VOLTAR PARA LMS
-    ===================================================== */
 
     campoLms.focus();
 
@@ -809,20 +1025,26 @@ function atualizarDashboard() {
     const retirados =
         registros.filter(
             item =>
-                item.status === "retirado"
+                item.status ===
+                "retirado"
         ).length;
+
 
     const devolvidos =
         registros.filter(
             item =>
-                item.status === "devolvido"
+                item.status ===
+                "devolvido"
         ).length;
+
 
     const extraviados =
         registros.filter(
             item =>
-                item.status === "extraviado"
+                item.status ===
+                "extraviado"
         ).length;
+
 
     const totalRetirados =
         document.getElementById(
@@ -839,6 +1061,7 @@ function atualizarDashboard() {
             "totalExtraviados"
         );
 
+
     if (totalRetirados) {
 
         totalRetirados.textContent =
@@ -846,12 +1069,14 @@ function atualizarDashboard() {
 
     }
 
+
     if (totalDevolvidos) {
 
         totalDevolvidos.textContent =
             devolvidos;
 
     }
+
 
     if (totalExtraviados) {
 
@@ -879,14 +1104,22 @@ function buscarDashboard() {
             "resultadoDashboard"
         );
 
-    if (!campo || !resultado) {
+
+    if (
+        !campo ||
+        !resultado
+    ) {
 
         return;
 
     }
 
+
     const termo =
-        normalizarTexto(campo.value);
+        normalizarTexto(
+            campo.value
+        );
+
 
     if (!termo) {
 
@@ -896,26 +1129,34 @@ function buscarDashboard() {
 
     }
 
+
     const encontrados =
         registros.filter(
             item =>
 
                 normalizarTexto(
                     item.lms
-                ).includes(termo)
+                ).includes(
+                    termo
+                )
 
                 ||
 
                 normalizarTexto(
                     item.nome
-                ).includes(termo)
+                ).includes(
+                    termo
+                )
 
                 ||
 
                 normalizarTexto(
                     item.codigo
-                ).includes(termo)
+                ).includes(
+                    termo
+                )
         );
+
 
     if (!encontrados.length) {
 
@@ -931,24 +1172,32 @@ function buscarDashboard() {
 
     }
 
+
     resultado.innerHTML =
         encontrados
-            .map(item => `
+            .map(
+                item => `
 
                 <div class="resultado">
 
                     <strong>
-                        ${escaparHTML(item.nome)}
+                        ${escaparHTML(
+                            item.nome
+                        )}
                     </strong>
 
                     <div>
                         LMS:
-                        ${escaparHTML(item.lms)}
+                        ${escaparHTML(
+                            item.lms
+                        )}
                     </div>
 
                     <div>
                         Equipamento:
-                        ${escaparHTML(item.codigo)}
+                        ${escaparHTML(
+                            item.codigo
+                        )}
                     </div>
 
                     <div>
@@ -956,10 +1205,14 @@ function buscarDashboard() {
                         Status:
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${escaparHTML(
+                                item.status
+                            )}"
                         >
                             ${escaparHTML(
-                                formatarStatus(item.status)
+                                formatarStatus(
+                                    item.status
+                                )
                             )}
                         </span>
 
@@ -967,7 +1220,9 @@ function buscarDashboard() {
 
                     <div>
                         Retirada:
-                        ${formatarData(item.retirada)}
+                        ${formatarData(
+                            item.retirada
+                        )}
                     </div>
 
                     <div>
@@ -996,7 +1251,8 @@ function buscarDashboard() {
 
                 </div>
 
-            `)
+            `
+            )
             .join("");
 
 }
@@ -1010,18 +1266,25 @@ function buscarDashboard() {
 function buscarRetirada() {
 
     const campoLms =
-        document.getElementById("lms");
+        document.getElementById(
+            "lms"
+        );
 
     const campoCodigo =
-        document.getElementById("codigo");
+        document.getElementById(
+            "codigo"
+        );
 
     const campoNome =
-        document.getElementById("nome");
+        document.getElementById(
+            "nome"
+        );
 
     const resultado =
         document.getElementById(
             "resultadoRetirada"
         );
+
 
     if (
         !campoLms ||
@@ -1034,22 +1297,35 @@ function buscarRetirada() {
 
     }
 
+
     const lms =
-        normalizarTexto(campoLms.value);
+        normalizarTexto(
+            campoLms.value
+        );
 
     const codigo =
-        normalizarTexto(campoCodigo.value);
+        normalizarTexto(
+            campoCodigo.value
+        );
 
     const nome =
-        normalizarTexto(campoNome.value);
+        normalizarTexto(
+            campoNome.value
+        );
 
-    if (!lms && !codigo && !nome) {
+
+    if (
+        !lms &&
+        !codigo &&
+        !nome
+    ) {
 
         resultado.innerHTML = "";
 
         return;
 
     }
+
 
     const encontrados =
         registros.filter(
@@ -1064,13 +1340,16 @@ function buscarRetirada() {
 
                 }
 
+
                 return (
 
                     (
                         lms &&
                         normalizarTexto(
                             item.lms
-                        ).includes(lms)
+                        ).includes(
+                            lms
+                        )
                     )
 
                     ||
@@ -1079,7 +1358,9 @@ function buscarRetirada() {
                         codigo &&
                         normalizarTexto(
                             item.codigo
-                        ).includes(codigo)
+                        ).includes(
+                            codigo
+                        )
                     )
 
                     ||
@@ -1088,13 +1369,16 @@ function buscarRetirada() {
                         nome &&
                         normalizarTexto(
                             item.nome
-                        ).includes(nome)
+                        ).includes(
+                            nome
+                        )
                     )
 
                 );
 
             }
         );
+
 
     if (!encontrados.length) {
 
@@ -1110,24 +1394,32 @@ function buscarRetirada() {
 
     }
 
+
     resultado.innerHTML =
         encontrados
-            .map(item => `
+            .map(
+                item => `
 
                 <div class="resultado">
 
                     <strong>
-                        ${escaparHTML(item.nome)}
+                        ${escaparHTML(
+                            item.nome
+                        )}
                     </strong>
 
                     <div>
                         LMS:
-                        ${escaparHTML(item.lms)}
+                        ${escaparHTML(
+                            item.lms
+                        )}
                     </div>
 
                     <div>
                         Equipamento:
-                        ${escaparHTML(item.codigo)}
+                        ${escaparHTML(
+                            item.codigo
+                        )}
                     </div>
 
                     <div>
@@ -1135,10 +1427,14 @@ function buscarRetirada() {
                         Status:
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${escaparHTML(
+                                item.status
+                            )}"
                         >
                             ${escaparHTML(
-                                formatarStatus(item.status)
+                                formatarStatus(
+                                    item.status
+                                )
                             )}
                         </span>
 
@@ -1161,14 +1457,17 @@ function buscarRetirada() {
 
                     <button
                         class="btn-editar"
-                        onclick="abrirEdicao(${Number(item.id)})"
+                        onclick="abrirEdicao(${Number(
+                            item.id
+                        )})"
                     >
                         Editar
                     </button>
 
                 </div>
 
-            `)
+            `
+            )
             .join("");
 
 }
@@ -1190,14 +1489,22 @@ async function carregarHistorico() {
             "tabelaHistorico"
         );
 
-    if (!campo || !tabela) {
+
+    if (
+        !campo ||
+        !tabela
+    ) {
 
         return;
 
     }
 
+
     const termo =
-        normalizarTexto(campo.value);
+        normalizarTexto(
+            campo.value
+        );
+
 
     const {
         data,
@@ -1208,6 +1515,7 @@ async function carregarHistorico() {
         .order("id", {
             ascending: true
         });
+
 
     if (error) {
 
@@ -1220,9 +1528,14 @@ async function carregarHistorico() {
 
     }
 
-    registros = data || [];
 
-    let lista = registros;
+    registros =
+        data || [];
+
+
+    let lista =
+        registros;
+
 
     if (termo) {
 
@@ -1232,22 +1545,29 @@ async function carregarHistorico() {
 
                     normalizarTexto(
                         item.lms
-                    ).includes(termo)
+                    ).includes(
+                        termo
+                    )
 
                     ||
 
                     normalizarTexto(
                         item.nome
-                    ).includes(termo)
+                    ).includes(
+                        termo
+                    )
 
                     ||
 
                     normalizarTexto(
                         item.codigo
-                    ).includes(termo)
+                    ).includes(
+                        termo
+                    )
             );
 
     }
+
 
     if (!lista.length) {
 
@@ -1263,7 +1583,10 @@ async function carregarHistorico() {
 
         `;
 
-        atualizarPaginacaoHistorico(0);
+
+        atualizarPaginacaoHistorico(
+            0
+        );
 
         atualizarDashboard();
 
@@ -1272,14 +1595,11 @@ async function carregarHistorico() {
     }
 
 
-    /* =====================================================
-       PAGINAÇÃO
-    ===================================================== */
-
     const listaOrdenada =
         lista
             .slice()
             .reverse();
+
 
     const totalPaginas =
         Math.ceil(
@@ -1287,13 +1607,16 @@ async function carregarHistorico() {
             REGISTROS_POR_PAGINA
         );
 
+
     if (
-        paginaHistoricoAtual < 1
+        paginaHistoricoAtual <
+        1
     ) {
 
         paginaHistoricoAtual = 1;
 
     }
+
 
     if (
         paginaHistoricoAtual >
@@ -1305,15 +1628,19 @@ async function carregarHistorico() {
 
     }
 
+
     const inicio =
         (
-            paginaHistoricoAtual - 1
+            paginaHistoricoAtual -
+            1
         ) *
         REGISTROS_POR_PAGINA;
+
 
     const fim =
         inicio +
         REGISTROS_POR_PAGINA;
+
 
     const listaPagina =
         listaOrdenada.slice(
@@ -1321,22 +1648,30 @@ async function carregarHistorico() {
             fim
         );
 
+
     tabela.innerHTML =
         listaPagina
-            .map(item => `
+            .map(
+                item => `
 
                 <tr>
 
                     <td>
-                        ${escaparHTML(item.lms)}
+                        ${escaparHTML(
+                            item.lms
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(item.nome)}
+                        ${escaparHTML(
+                            item.nome
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(item.codigo)}
+                        ${escaparHTML(
+                            item.codigo
+                        )}
                     </td>
 
                     <td>
@@ -1358,7 +1693,9 @@ async function carregarHistorico() {
                     <td>
 
                         <span
-                            class="status ${escaparHTML(item.status)}"
+                            class="status ${escaparHTML(
+                                item.status
+                            )}"
                         >
                             ${escaparHTML(
                                 formatarStatus(
@@ -1385,14 +1722,18 @@ async function carregarHistorico() {
 
                         <button
                             class="btn-editar"
-                            onclick="abrirEdicao(${Number(item.id)})"
+                            onclick="abrirEdicao(${Number(
+                                item.id
+                            )})"
                         >
                             Editar
                         </button>
 
                         <button
                             class="btn-excluir"
-                            onclick="excluirRegistro(${Number(item.id)})"
+                            onclick="excluirRegistro(${Number(
+                                item.id
+                            )})"
                         >
                             Excluir
                         </button>
@@ -1401,8 +1742,10 @@ async function carregarHistorico() {
 
                 </tr>
 
-            `)
+            `
+            )
             .join("");
+
 
     atualizarPaginacaoHistorico(
         listaOrdenada.length
@@ -1424,24 +1767,31 @@ function atualizarPaginacaoHistorico(
             "tabelaHistorico"
         );
 
+
     if (!tabela) return;
+
 
     const containerTabela =
         tabela.closest(
             ".tabela-container"
         );
 
+
     if (!containerTabela) return;
+
 
     let paginacao =
         document.getElementById(
             "paginacaoHistorico"
         );
 
+
     if (!paginacao) {
 
         paginacao =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
         paginacao.id =
             "paginacaoHistorico";
@@ -1461,12 +1811,14 @@ function atualizarPaginacaoHistorico(
         paginacao.style.marginTop =
             "20px";
 
+
         containerTabela.parentNode.insertBefore(
             paginacao,
             containerTabela.nextSibling
         );
 
     }
+
 
     if (!totalRegistros) {
 
@@ -1479,13 +1831,17 @@ function atualizarPaginacaoHistorico(
 
     }
 
+
     const totalPaginas =
         Math.ceil(
             totalRegistros /
             REGISTROS_POR_PAGINA
         );
 
-    if (totalPaginas <= 1) {
+
+    if (
+        totalPaginas <= 1
+    ) {
 
         paginacao.innerHTML = "";
 
@@ -1496,8 +1852,10 @@ function atualizarPaginacaoHistorico(
 
     }
 
+
     paginacao.style.display =
         "flex";
+
 
     paginacao.innerHTML = `
 
@@ -1554,12 +1912,14 @@ function atualizarPaginacaoHistorico(
 function paginaHistoricoAnterior() {
 
     if (
-        paginaHistoricoAtual <= 1
+        paginaHistoricoAtual <=
+        1
     ) {
 
         return;
 
     }
+
 
     paginaHistoricoAtual--;
 
@@ -1592,7 +1952,9 @@ function mostrarTodos() {
             "buscaHistorico"
         );
 
+
     if (!campo) return;
+
 
     campo.value = "";
 
@@ -1616,7 +1978,9 @@ function abrirEdicao(id) {
                 Number(id)
         );
 
+
     if (!registro) return;
+
 
     const editarId =
         document.getElementById(
@@ -1653,6 +2017,7 @@ function abrirEdicao(id) {
             "modalEdicao"
         );
 
+
     if (
         !editarId ||
         !editarLms ||
@@ -1666,6 +2031,7 @@ function abrirEdicao(id) {
         return;
 
     }
+
 
     editarId.value =
         registro.id;
@@ -1683,7 +2049,9 @@ function abrirEdicao(id) {
         registro.status;
 
     editarObservacao.value =
-        registro.observacao || "";
+        registro.observacao ||
+        "";
+
 
     modal.classList.add(
         "aberto"
@@ -1705,30 +2073,36 @@ async function salvarEdicao() {
             ).value
         );
 
+
     const lms =
         document.getElementById(
             "editarLms"
         ).value.trim();
+
 
     const nome =
         document.getElementById(
             "editarNome"
         ).value.trim();
 
+
     const codigo =
         document.getElementById(
             "editarCodigo"
         ).value.trim();
+
 
     const observacao =
         document.getElementById(
             "editarObservacao"
         ).value.trim();
 
+
     const novoStatus =
         document.getElementById(
             "editarStatus"
         ).value;
+
 
     if (
         !lms ||
@@ -1744,11 +2118,14 @@ async function salvarEdicao() {
 
     }
 
+
     const registro =
         registros.find(
             item =>
-                Number(item.id) === id
+                Number(item.id) ===
+                id
         );
+
 
     if (!registro) {
 
@@ -1761,18 +2138,17 @@ async function salvarEdicao() {
     }
 
 
-    /* =====================================================
-       VALIDAR COLABORADOR
-    ===================================================== */
-
     const colaborador =
         colaboradores.find(
             item =>
                 normalizarTexto(
                     item.lms
                 ) ===
-                normalizarTexto(lms)
+                normalizarTexto(
+                    lms
+                )
         );
+
 
     if (!colaborador) {
 
@@ -1785,22 +2161,20 @@ async function salvarEdicao() {
     }
 
 
-    /* =====================================================
-       VERIFICAR CÓDIGO DUPLICADO
-    ===================================================== */
-
     if (
-        novoStatus === "retirado"
+        novoStatus ===
+        "retirado"
     ) {
 
         const equipamentoExistente =
             registros.find(
                 item =>
 
-                    Number(item.id) !== id &&
+                    Number(item.id) !==
+                    id &&
 
                     item.status ===
-                        "retirado" &&
+                    "retirado" &&
 
                     normalizarTexto(
                         item.codigo
@@ -1810,7 +2184,10 @@ async function salvarEdicao() {
                     )
             );
 
-        if (equipamentoExistente) {
+
+        if (
+            equipamentoExistente
+        ) {
 
             alert(
                 "Este equipamento já está registrado como retirado."
@@ -1823,15 +2200,13 @@ async function salvarEdicao() {
     }
 
 
-    /* =====================================================
-       DEVOLUÇÃO
-    ===================================================== */
-
     let devolucao =
         registro.devolucao;
 
+
     if (
-        novoStatus === "devolvido" &&
+        novoStatus ===
+        "devolvido" &&
         !devolucao
     ) {
 
@@ -1840,18 +2215,16 @@ async function salvarEdicao() {
 
     }
 
+
     if (
-        novoStatus !== "devolvido"
+        novoStatus !==
+        "devolvido"
     ) {
 
         devolucao = null;
 
     }
 
-
-    /* =====================================================
-       ATUALIZAR BANCO
-    ===================================================== */
 
     const {
         data,
@@ -1879,9 +2252,13 @@ async function salvarEdicao() {
                 devolucao
 
         })
-        .eq("id", id)
+        .eq(
+            "id",
+            id
+        )
         .select()
         .single();
+
 
     if (error) {
 
@@ -1890,15 +2267,18 @@ async function salvarEdicao() {
             error
         );
 
+
         if (
-            error.code === "23505"
+            error.code ===
+            "23505"
         ) {
 
             alert(
                 "Este equipamento já está registrado como retirado."
             );
 
-        } else {
+        }
+        else {
 
             alert(
                 "Erro ao salvar as alterações."
@@ -1911,20 +2291,22 @@ async function salvarEdicao() {
     }
 
 
-    /* =====================================================
-       ATUALIZAR ARRAY
-    ===================================================== */
-
     const indice =
         registros.findIndex(
             item =>
-                Number(item.id) === id
+                Number(item.id) ===
+                id
         );
 
-    if (indice !== -1) {
 
-        registros[indice] =
-            data;
+    if (
+        indice !==
+        -1
+    ) {
+
+        registros[
+            indice
+        ] = data;
 
     }
 
@@ -1949,7 +2331,9 @@ function fecharModal() {
             "modalEdicao"
         );
 
+
     if (!modal) return;
+
 
     modal.classList.remove(
         "aberto"
@@ -1969,14 +2353,20 @@ async function excluirRegistro(id) {
             "Tem certeza que deseja excluir este registro?"
         );
 
+
     if (!confirmar) return;
+
 
     const {
         error
     } = await db
         .from("registros")
         .delete()
-        .eq("id", id);
+        .eq(
+            "id",
+            id
+        );
+
 
     if (error) {
 
@@ -1993,12 +2383,14 @@ async function excluirRegistro(id) {
 
     }
 
+
     registros =
         registros.filter(
             item =>
                 Number(item.id) !==
                 Number(id)
         );
+
 
     atualizarDashboard();
 
@@ -2020,7 +2412,9 @@ function abrirEdicaoColaborador(id) {
                 Number(id)
         );
 
+
     if (!colaborador) return;
+
 
     const campoId =
         document.getElementById(
@@ -2042,6 +2436,7 @@ function abrirEdicaoColaborador(id) {
             "modalColaborador"
         );
 
+
     if (
         !campoId ||
         !campoLms ||
@@ -2053,6 +2448,7 @@ function abrirEdicaoColaborador(id) {
 
     }
 
+
     campoId.value =
         colaborador.id;
 
@@ -2061,6 +2457,7 @@ function abrirEdicaoColaborador(id) {
 
     campoNome.value =
         colaborador.nome;
+
 
     modal.classList.add(
         "aberto"
@@ -2082,17 +2479,23 @@ async function salvarEdicaoColaborador() {
             ).value
         );
 
+
     const lms =
         document.getElementById(
             "editarColaboradorLms"
         ).value.trim();
+
 
     const nome =
         document.getElementById(
             "editarColaboradorNome"
         ).value.trim();
 
-    if (!lms || !nome) {
+
+    if (
+        !lms ||
+        !nome
+    ) {
 
         alert(
             "Preencha o LMS e o nome."
@@ -2102,19 +2505,26 @@ async function salvarEdicaoColaborador() {
 
     }
 
+
     const outroColaborador =
         colaboradores.find(
             item =>
 
-                Number(item.id) !== id &&
+                Number(item.id) !==
+                id &&
 
                 normalizarTexto(
                     item.lms
                 ) ===
-                normalizarTexto(lms)
+                normalizarTexto(
+                    lms
+                )
         );
 
-    if (outroColaborador) {
+
+    if (
+        outroColaborador
+    ) {
 
         alert(
             "Este LMS já pertence a outro colaborador."
@@ -2124,21 +2534,21 @@ async function salvarEdicaoColaborador() {
 
     }
 
+
     const colaborador =
         colaboradores.find(
             item =>
-                Number(item.id) === id
+                Number(item.id) ===
+                id
         );
 
+
     if (!colaborador) return;
+
 
     const lmsAntigo =
         colaborador.lms;
 
-
-    /* =====================================================
-       ATUALIZAR COLABORADOR
-    ===================================================== */
 
     const {
         data: colaboradorAtualizado,
@@ -2154,9 +2564,13 @@ async function salvarEdicaoColaborador() {
                 nome
 
         })
-        .eq("id", id)
+        .eq(
+            "id",
+            id
+        )
         .select()
         .single();
+
 
     if (erroColaborador) {
 
@@ -2170,12 +2584,9 @@ async function salvarEdicaoColaborador() {
         );
 
         return;
+
     }
 
-
-    /* =====================================================
-       ATUALIZAR REGISTROS ANTIGOS
-    ===================================================== */
 
     const {
         error: erroRegistros
@@ -2190,7 +2601,10 @@ async function salvarEdicaoColaborador() {
                 nome
 
         })
-        .eq("lms", lmsAntigo);
+        .eq(
+            "lms",
+            lmsAntigo
+        );
 
 
     if (erroRegistros) {
@@ -2207,16 +2621,13 @@ async function salvarEdicaoColaborador() {
     }
 
 
-    /* =====================================================
-       ATUALIZAR ARRAY LOCAL DE COLABORADORES
-    ===================================================== */
-
     colaboradores =
         colaboradores.map(
             item => {
 
                 if (
-                    Number(item.id) === id
+                    Number(item.id) ===
+                    id
                 ) {
 
                     return colaboradorAtualizado;
@@ -2229,16 +2640,13 @@ async function salvarEdicaoColaborador() {
         );
 
 
-    /* =====================================================
-       ATUALIZAR ARRAY LOCAL DE REGISTROS
-    ===================================================== */
-
     registros =
         registros.map(
             item => {
 
                 if (
-                    item.lms === lmsAntigo
+                    item.lms ===
+                    lmsAntigo
                 ) {
 
                     return {
@@ -2261,16 +2669,8 @@ async function salvarEdicaoColaborador() {
         );
 
 
-    /* =====================================================
-       FECHAR MODAL
-    ===================================================== */
-
     fecharModalColaborador();
 
-
-    /* =====================================================
-       ATUALIZAR TELA
-    ===================================================== */
 
     await carregarColaboradores();
 
@@ -2282,7 +2682,7 @@ async function salvarEdicaoColaborador() {
 
 
 /* =========================================================
-FECHAR MODAL DE COLABORADOR
+   FECHAR MODAL DE COLABORADOR
 ========================================================= */
 
 function fecharModalColaborador() {
@@ -2292,7 +2692,9 @@ function fecharModalColaborador() {
             "modalColaborador"
         );
 
+
     if (!modal) return;
+
 
     modal.classList.remove(
         "aberto"
@@ -2302,7 +2704,7 @@ function fecharModalColaborador() {
 
 
 /* =========================================================
-EXCLUIR COLABORADOR
+   EXCLUIR COLABORADOR
 ========================================================= */
 
 async function excluirColaborador(id) {
@@ -2340,7 +2742,10 @@ async function excluirColaborador(id) {
     } = await db
         .from("colaboradores")
         .delete()
-        .eq("id", id);
+        .eq(
+            "id",
+            id
+        );
 
 
     if (error) {
@@ -2359,10 +2764,6 @@ async function excluirColaborador(id) {
     }
 
 
-    /* =====================================================
-       REMOVER DO ARRAY LOCAL
-    ===================================================== */
-
     colaboradores =
         colaboradores.filter(
             item =>
@@ -2371,20 +2772,18 @@ async function excluirColaborador(id) {
         );
 
 
-    /* =====================================================
-       ATUALIZAR LISTA
-    ===================================================== */
-
     await carregarColaboradores();
 
 }
 
 
 /* =========================================================
-FORMATAÇÃO DE STATUS
+   FORMATAÇÃO DE STATUS
 ========================================================= */
 
-function formatarStatus(status) {
+function formatarStatus(
+    status
+) {
 
     const nomes = {
 
@@ -2409,10 +2808,12 @@ function formatarStatus(status) {
 
 
 /* =========================================================
-FORMATAÇÃO DE DATA
+   FORMATAÇÃO DE DATA
 ========================================================= */
 
-function formatarData(data) {
+function formatarData(
+    data
+) {
 
     if (!data) {
 
@@ -2448,10 +2849,37 @@ function formatarData(data) {
 
 
 /* =========================================================
-SEGURANÇA BÁSICA
+   NORMALIZAÇÃO DE TEXTO
 ========================================================= */
 
-function escaparHTML(texto) {
+function normalizarTexto(
+    texto
+) {
+
+    if (
+        texto === undefined ||
+        texto === null
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(texto)
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* =========================================================
+   SEGURANÇA BÁSICA
+========================================================= */
+
+function escaparHTML(
+    texto
+) {
 
     if (
         texto === undefined ||
@@ -2494,7 +2922,7 @@ function escaparHTML(texto) {
 
 
 /* =========================================================
-ENTER - LEITOR 2D
+   ENTER - LEITOR 2D
 ========================================================= */
 
 document.addEventListener(
@@ -2529,8 +2957,10 @@ document.addEventListener(
 
         if (
             elemento &&
-            elemento.id === "lms" &&
-            event.key === "Enter"
+            elemento.id ===
+                "lms" &&
+            event.key ===
+                "Enter"
         ) {
 
             event.preventDefault();
@@ -2550,7 +2980,8 @@ document.addEventListener(
 
             if (
                 campoNome &&
-                campoNome.value.trim() !== ""
+                campoNome.value.trim() !==
+                    ""
             ) {
 
                 campoCodigo.focus();
@@ -2569,8 +3000,10 @@ document.addEventListener(
 
         if (
             elemento &&
-            elemento.id === "codigo" &&
-            event.key === "Enter"
+            elemento.id ===
+                "codigo" &&
+            event.key ===
+                "Enter"
         ) {
 
             event.preventDefault();
@@ -2586,7 +3019,7 @@ document.addEventListener(
 
 
 /* =========================================================
-INICIALIZAÇÃO
+   INICIALIZAÇÃO DO SISTEMA
 ========================================================= */
 
 document.addEventListener(
@@ -2597,6 +3030,29 @@ document.addEventListener(
             "Sistema de Controle de Equipamentos iniciado."
         );
 
+
+        /* =================================================
+           VERIFICAR SUPABASE
+        ================================================= */
+
+        const supabaseOK =
+            inicializarSupabase();
+
+
+        if (!supabaseOK) {
+
+            alert(
+                "Erro: o Supabase não foi carregado. Verifique o index.html."
+            );
+
+            return;
+
+        }
+
+
+        /* =================================================
+           CARREGAR DADOS
+        ================================================= */
 
         try {
 
@@ -2612,6 +3068,10 @@ document.addEventListener(
                 error
             );
 
+            alert(
+                "Não foi possível carregar os dados do sistema."
+            );
+
         }
 
     }
@@ -2619,5 +3079,5 @@ document.addEventListener(
 
 
 /* =========================================================
-FIM DO SCRIPT
+   FIM DO SCRIPT
 ========================================================= */
