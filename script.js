@@ -413,115 +413,228 @@ function buscarNomePorLms() {
 }
 
 
-/* =========================================================
-REGISTRAR RETIRADA
-========================================================= */
-
 async function registrarRetirada() {
 
-const lms = document
-    .getElementById("lms")
-    .value
-    .trim();
+    const lms = document
+        .getElementById("lms")
+        .value
+        .trim();
 
-const nome = document
-    .getElementById("nome")
-    .value
-    .trim();
+    const nome = document
+        .getElementById("nome")
+        .value
+        .trim();
 
-const codigo = document
-    .getElementById("codigo")
-    .value
-    .trim();
+    const codigo = document
+        .getElementById("codigo")
+        .value
+        .trim();
 
-const observacao = document
-    .getElementById("observacao")
-    .value
-    .trim();
+    const observacao = document
+        .getElementById("observacao")
+        .value
+        .trim();
 
-if (!lms || !codigo) {
+    if (!lms || !codigo) {
 
-    alert(
-        "Preencha o LMS e o código do equipamento."
-    );
+        alert(
+            "Preencha o LMS e o código do equipamento."
+        );
 
-    return;
-}
+        return;
+    }
 
-if (!nome) {
+    if (!nome) {
 
-    alert(
-        "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
-    );
+        alert(
+            "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
+        );
 
-    return;
-}
+        return;
+    }
 
-const { data: equipamentoExistente, error: erroBusca } =
-    await db
+
+    /* =====================================================
+       VERIFICAR SE EQUIPAMENTO JÁ ESTÁ RETIRADO
+    ===================================================== */
+
+    const {
+        data: equipamentoExistente,
+        error: erroBusca
+    } = await db
         .from("registros")
-        .select("*")
+        .select("id, codigo, status")
         .ilike("codigo", codigo)
         .eq("status", "retirado")
         .limit(1);
 
-if (erroBusca) {
+    if (erroBusca) {
 
-    console.error(
-        "Erro ao verificar equipamento:",
-        erroBusca
-    );
+        console.error(
+            "Erro ao verificar equipamento:",
+            erroBusca
+        );
 
-    alert(
-        "Erro ao verificar o equipamento."
-    );
+        alert(
+            "Erro ao verificar o equipamento."
+        );
 
-    return;
-}
+        return;
+    }
 
-if (
-    equipamentoExistente &&
-    equipamentoExistente.length > 0
-) {
+    if (
+        equipamentoExistente &&
+        equipamentoExistente.length > 0
+    ) {
 
-    alert(
-        "Este equipamento já está registrado como retirado."
-    );
+        alert(
+            "Este equipamento já está registrado como retirado."
+        );
 
-    return;
-}
+        return;
+    }
 
-const { data, error } = await db
-    .from("registros")
-    .insert([
-        {
-            lms: lms,
-            nome: nome,
-            codigo: codigo,
-            observacao: observacao || null,
-            retirada: new Date().toISOString(),
-            devolucao: null,
-            status: "retirado"
-        }
-    ])
-    .select()
-    .single();
 
-if (error) {
+    /* =====================================================
+       INSERIR REGISTRO
+    ===================================================== */
 
-    console.error(
-        "Erro ao registrar retirada:",
+    const {
+        data,
         error
+    } = await db
+        .from("registros")
+        .insert([
+            {
+                lms: lms,
+                nome: nome,
+                codigo: codigo,
+                observacao: observacao || null,
+                retirada: new Date().toISOString(),
+                devolucao: null,
+                status: "retirado"
+            }
+        ])
+        .select()
+        .single();
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao registrar retirada:",
+            error
+        );
+
+        alert(
+            "Erro ao registrar a retirada."
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "Registro criado com sucesso:",
+        data
     );
 
-    alert(
-        "Erro ao registrar a retirada."
-    );
 
-    return;
+    /* =====================================================
+       RECARREGAR TODOS OS REGISTROS DO BANCO
+    ===================================================== */
+
+    const {
+        data: registrosAtualizados,
+        error: erroAtualizacao
+    } = await db
+        .from("registros")
+        .select("*")
+        .order("id", { ascending: true });
+
+
+    if (erroAtualizacao) {
+
+        console.error(
+            "Erro ao atualizar registros:",
+            erroAtualizacao
+        );
+
+        // Mesmo que a atualização falhe,
+        // mantém o registro recém-criado na memória.
+        registros.push(data);
+
+    } else {
+
+        registros = registrosAtualizados || [];
+
+    }
+
+
+    /* =====================================================
+       ATUALIZAR DASHBOARD
+    ===================================================== */
+
+    atualizarDashboard();
+
+
+    /* =====================================================
+       LIMPAR FORMULÁRIO
+    ===================================================== */
+
+    document.getElementById("lms").value = "";
+
+    document.getElementById("nome").value = "";
+
+    document.getElementById("codigo").value = "";
+
+    document.getElementById("observacao").value = "";
+
+    document.getElementById("statusLms").textContent = "";
+
+    document.getElementById("statusLms").className =
+        "status-lms";
+
+
+    /* =====================================================
+       MENSAGEM DE SUCESSO
+    ===================================================== */
+
+    const mensagem =
+        document.getElementById("mensagemRetirada");
+
+    mensagem.innerHTML = `
+        <div class="mensagem-sucesso">
+            ✓ Retirada registrada com sucesso!
+            <br>
+            Equipamento:
+            <strong>${escaparHTML(data.codigo)}</strong>
+        </div>
+    `;
+
+
+    setTimeout(() => {
+
+        mensagem.innerHTML = "";
+
+    }, 2000);
+
+
+    /* =====================================================
+       ATUALIZAR HISTÓRICO
+    ===================================================== */
+
+    paginaHistoricoAtual = 1;
+
+    carregarHistorico();
+
+
+    /* =====================================================
+       FOCO NO LMS
+    ===================================================== */
+
+    document.getElementById("lms").focus();
 }
-
-registros.push(data);
 
 
 /* =====================================================
