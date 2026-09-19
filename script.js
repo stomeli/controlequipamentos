@@ -1754,22 +1754,19 @@ SEGURANÇA BÁSICA
 
 function escaparHTML(texto) {
 
-if (
-    texto === undefined ||
-    texto === null
-) {
+    if (
+        texto === undefined ||
+        texto === null
+    ) {
+        return "";
+    }
 
-    return "";
-
-}
-
-return String(texto)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 
@@ -1794,13 +1791,6 @@ document.addEventListener(
         const elemento =
             document.activeElement;
 
-
-        /* =====================================================
-           ENTER NO LMS
-           → IGNORA
-           → VAI PARA O CÓDIGO
-        ===================================================== */
-
         if (
             elemento &&
             elemento.id === "lms" &&
@@ -1818,19 +1808,11 @@ document.addEventListener(
             if (
                 campoNome.value.trim() !== ""
             ) {
-
                 campoCodigo.focus();
-
             }
 
             return;
         }
-
-
-        /* =====================================================
-           ENTER NO CÓDIGO
-           → REGISTRA
-        ===================================================== */
 
         if (
             elemento &&
@@ -1844,21 +1826,19 @@ document.addEventListener(
 
             return;
         }
-
     }
 );
 
 
 /* =========================================================
-INICIALIZAÇÃO
+   INICIALIZAÇÃO
 ========================================================= */
 
 document.addEventListener(
-"DOMContentLoaded",
-async () => {
+    "DOMContentLoaded",
+    async () => {
 
-    await carregarDados();
+        await carregarDados();
 
-}
-
+    }
 );
