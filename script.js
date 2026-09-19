@@ -2068,16 +2068,17 @@ function inicializarFiltroDataHistorico() {
 
 }
 
-
 /* =========================================================
    ATUALIZAR TEXTO DO BOTÃO DO FILTRO DE DATA
 ========================================================= */
 
 function atualizarTextoBotaoFiltroData() {
+    console.log("atualizarTextoBotaoFiltroData() executada.");
+
     const botao = document.getElementById("botaoFiltroDataHistorico");
 
     if (!botao) {
-        console.warn("botaoFiltroDataHistorico não encontrado.");
+        console.warn("Botão botaoFiltroDataHistorico não encontrado.");
         return;
     }
 
