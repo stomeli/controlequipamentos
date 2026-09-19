@@ -413,6 +413,10 @@ function buscarNomePorLms() {
 }
 
 
+/* =========================================================
+REGISTRAR RETIRADA
+========================================================= */
+
 async function registrarRetirada() {
 
     const lms = document
@@ -435,6 +439,11 @@ async function registrarRetirada() {
         .value
         .trim();
 
+
+    /* =====================================================
+       VALIDAÇÃO
+    ===================================================== */
+
     if (!lms || !codigo) {
 
         alert(
@@ -452,6 +461,173 @@ async function registrarRetirada() {
 
         return;
     }
+
+
+    /* =====================================================
+       VERIFICAR EQUIPAMENTO JÁ RETIRADO
+    ===================================================== */
+
+    const {
+        data: equipamentoExistente,
+        error: erroBusca
+    } = await db
+        .from("registros")
+        .select("id, codigo, status")
+        .ilike("codigo", codigo)
+        .eq("status", "retirado")
+        .limit(1);
+
+
+    if (erroBusca) {
+
+        console.error(
+            "Erro ao verificar equipamento:",
+            erroBusca
+        );
+
+        alert(
+            "Erro ao verificar o equipamento."
+        );
+
+        return;
+    }
+
+
+    if (
+        equipamentoExistente &&
+        equipamentoExistente.length > 0
+    ) {
+
+        alert(
+            "Este equipamento já está registrado como retirado."
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       SALVAR NO SUPABASE
+    ===================================================== */
+
+    const {
+        data,
+        error
+    } = await db
+        .from("registros")
+        .insert([
+            {
+                lms: lms,
+                nome: nome,
+                codigo: codigo,
+                observacao: observacao || null,
+                retirada: new Date().toISOString(),
+                devolucao: null,
+                status: "retirado"
+            }
+        ])
+        .select()
+        .single();
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao registrar retirada:",
+            error
+        );
+
+        alert(
+            "Erro ao registrar a retirada."
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "Registro salvo:",
+        data
+    );
+
+
+    /* =====================================================
+       ATUALIZAR ARRAY LOCAL
+    ===================================================== */
+
+    registros.push(data);
+
+
+    /* =====================================================
+       ATUALIZAR DASHBOARD
+    ===================================================== */
+
+    atualizarDashboard();
+
+
+    /* =====================================================
+       ATUALIZAR HISTÓRICO
+    ===================================================== */
+
+    paginaHistoricoAtual = 1;
+
+    carregarHistorico();
+
+
+    /* =====================================================
+       LIMPAR FORMULÁRIO
+    ===================================================== */
+
+    document.getElementById("lms").value = "";
+
+    document.getElementById("nome").value = "";
+
+    document.getElementById("codigo").value = "";
+
+    document.getElementById("observacao").value = "";
+
+    document.getElementById("statusLms").textContent = "";
+
+    document.getElementById("statusLms").className =
+        "status-lms";
+
+
+    /* =====================================================
+       MENSAGEM DE SUCESSO
+    ===================================================== */
+
+    const mensagem =
+        document.getElementById("mensagemRetirada");
+
+
+    if (mensagem) {
+
+        mensagem.innerHTML = `
+            <div class="mensagem-sucesso">
+                ✓ Retirada registrada com sucesso!
+                <br>
+                Equipamento:
+                <strong>${escaparHTML(data.codigo)}</strong>
+            </div>
+        `;
+
+
+        setTimeout(() => {
+
+            mensagem.innerHTML = "";
+
+        }, 2000);
+
+    }
+
+
+    /* =====================================================
+       VOLTAR PARA LMS
+    ===================================================== */
+
+    document.getElementById("lms").focus();
+
+}
 
 
     /* =====================================================
@@ -631,65 +807,6 @@ async function registrarRetirada() {
     });
 }
 
-
-
-    /* =====================================================
-       LIMPAR FORMULÁRIO
-    ===================================================== */
-
-    document.getElementById("lms").value = "";
-
-    document.getElementById("nome").value = "";
-
-    document.getElementById("codigo").value = "";
-
-    document.getElementById("observacao").value = "";
-
-    document.getElementById("statusLms").textContent = "";
-
-    document.getElementById("statusLms").className =
-        "status-lms";
-
-
-    /* =====================================================
-       MENSAGEM DE SUCESSO
-    ===================================================== */
-
-    const mensagem =
-        document.getElementById("mensagemRetirada");
-
-    mensagem.innerHTML = `
-        <div class="mensagem-sucesso">
-            ✓ Retirada registrada com sucesso!
-            <br>
-            Equipamento:
-            <strong>${escaparHTML(data.codigo)}</strong>
-        </div>
-    `;
-
-
-    setTimeout(() => {
-
-        mensagem.innerHTML = "";
-
-    }, 2000);
-
-
-    /* =====================================================
-       ATUALIZAR HISTÓRICO
-    ===================================================== */
-
-    paginaHistoricoAtual = 1;
-
-    carregarHistorico();
-
-
-    /* =====================================================
-       FOCO NO LMS
-    ===================================================== */
-
-    document.getElementById("lms").focus();
-}
 
 
 /* =====================================================
@@ -2013,77 +2130,32 @@ document.addEventListener(
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
+
 document.addEventListener(
-  "DOMContentLoaded",
-  async function () {
+    "DOMContentLoaded",
+    async function () {
 
-    console.log(
-      "Sistema de Controle de Equipamentos iniciado."
-    );
+        console.log(
+            "Sistema de Controle de Equipamentos iniciado."
+        );
 
+        try {
 
-    registrarEventosFormularios();
+            await carregarDados();
 
-    registrarEventosBusca();
+            atualizarDashboard();
 
-    registrarEventosFiltrosQuebrados();
+        } catch (error) {
 
+            console.error(
+                "Falha na inicialização:",
+                error
+            );
 
-    try {
-
-      await carregarDados();
-
-      preencherAnos();
-
-      atualizarDashboard();
-
-    } catch (error) {
-
-      console.error(
-        "Falha na inicialização:",
-        error
-      );
+        }
 
     }
-  }
 );
-
-/* =========================================================
-   EXPOSIÇÃO DAS FUNÇÕES NO WINDOW
-   ========================================================= */
-
-window.showPage =
-  showPage;
-
-window.toggleMenu =
-  toggleMenu;
-
-window.adicionarEquipamento =
-  adicionarEquipamento;
-
-window.adicionarQuebrado =
-  adicionarQuebrado;
-
-window.editarEquipamento =
-  editarEquipamento;
-
-window.excluirEquipamento =
-  excluirEquipamento;
-
-window.editarRegistroQuebrado =
-  editarRegistroQuebrado;
-
-window.excluirRegistroQuebrado =
-  excluirRegistroQuebrado;
-
-window.fecharModal =
-  fecharModal;
-
-window.mudarPagina =
-  mudarPagina;
-
-window.limparFiltrosQuebrados =
-  limparFiltrosQuebrados;
 
 
 
