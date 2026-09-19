@@ -2074,35 +2074,19 @@ function inicializarFiltroDataHistorico() {
 ========================================================= */
 
 function alternarFiltroDataHistorico() {
-
-    const painel =
-        document.getElementById(
-            "painelFiltroDataHistorico"
-        );
-
+    const painel = document.getElementById("painelFiltroDataHistorico");
 
     if (!painel) {
-
+        console.error("painelFiltroDataHistorico não encontrado.");
         return;
-
     }
 
+    painel.classList.toggle("aberto");
 
-    painel.classList.toggle(
-        "aberto"
-    );
-
-
-    if (
-        painel.classList.contains(
-            "aberto"
-        )
-    ) {
-
+    if (painel.classList.contains("aberto")) {
         renderizarCalendarioHistorico();
-
+        atualizarTextoBotaoFiltroData();
     }
-
 }
 
 
