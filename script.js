@@ -1170,7 +1170,9 @@ PRÓXIMA PÁGINA
 
 function paginaHistoricoProxima() {
 
-carregarHistorico();
+    paginaHistoricoAtual++;
+
+    carregarHistorico();
 
 }
 
