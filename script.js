@@ -2,8 +2,8 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "https://apbmzwmqyiyrximydseq.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
+const SUPABASE_URL = "superbase";
+const SUPABASE_ANON_KEY = "superbase key";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
