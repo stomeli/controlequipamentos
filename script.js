@@ -1,800 +1,737 @@
 /* =========================================================
-   SUPABASE
+SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "superbase";
-const SUPABASE_ANON_KEY = "superbase key";
+const SUPABASE_URL = "https://apbmzwmqyiyrximydseq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Qlgo3bzEfOZJBLLjyTxMkg_0p6v-Z8n";
 
 const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
+SUPABASE_URL,
+SUPABASE_ANON_KEY
 );
 
-
 /* =========================================================
-   DADOS
+DADOS
 ========================================================= */
 
 let registros = [];
 let colaboradores = [];
 
+/* =========================================================
+PAGINAÇÃO
+========================================================= */
+
+const REGISTROS_POR_PAGINA = 40;
+
+let paginaHistoricoAtual = 1;
 
 /* =========================================================
-   CARREGAR DADOS DO BANCO
+CARREGAR DADOS DO BANCO
 ========================================================= */
 
 async function carregarDados() {
 
-    const { data: dadosRegistros, error: erroRegistros } =
-        await db
-            .from("registros")
-            .select("*")
-            .order("id", { ascending: true });
+const { data: dadosRegistros, error: erroRegistros } =
+    await db
+        .from("registros")
+        .select("*")
+        .order("id", { ascending: true });
 
-    if (erroRegistros) {
+if (erroRegistros) {
 
-        console.error(
-            "Erro ao carregar registros:",
-            erroRegistros
-        );
+    console.error(
+        "Erro ao carregar registros:",
+        erroRegistros
+    );
 
-        alert(
-            "Não foi possível carregar os registros do banco de dados."
-        );
+    alert(
+        "Não foi possível carregar os registros do banco de dados."
+    );
 
-        return;
-    }
+    return;
+}
 
+const { data: dadosColaboradores, error: erroColaboradores } =
+    await db
+        .from("colaboradores")
+        .select("*")
+        .order("id", { ascending: true });
 
-    const { data: dadosColaboradores, error: erroColaboradores } =
-        await db
-            .from("colaboradores")
-            .select("*")
-            .order("id", { ascending: true });
+if (erroColaboradores) {
 
-    if (erroColaboradores) {
+    console.error(
+        "Erro ao carregar colaboradores:",
+        erroColaboradores
+    );
 
-        console.error(
-            "Erro ao carregar colaboradores:",
-            erroColaboradores
-        );
+    alert(
+        "Não foi possível carregar os colaboradores do banco de dados."
+    );
 
-        alert(
-            "Não foi possível carregar os colaboradores do banco de dados."
-        );
+    return;
+}
 
-        return;
-    }
+registros = dadosRegistros || [];
 
+colaboradores = dadosColaboradores || [];
 
-    registros = dadosRegistros || [];
+atualizarDashboard();
 
-    colaboradores = dadosColaboradores || [];
-
-
-    atualizarDashboard();
-
-    carregarHistorico();
+carregarHistorico();
 
 }
 
-
 /* =========================================================
-   NAVEGAÇÃO
+NAVEGAÇÃO
 ========================================================= */
 
 function mostrarPagina(pagina, botao) {
 
-    document.querySelectorAll(".pagina").forEach(section => {
+document.querySelectorAll(".pagina").forEach(section => {
 
-        section.classList.remove("active");
+    section.classList.remove("active");
 
-    });
+});
 
+document.querySelectorAll(".menu-btn").forEach(button => {
 
-    document.querySelectorAll(".menu-btn").forEach(button => {
+    button.classList.remove("active");
 
-        button.classList.remove("active");
+});
 
-    });
+document
+    .getElementById(pagina)
+    .classList.add("active");
 
+if (botao) {
 
-    document
-        .getElementById(pagina)
-        .classList.add("active");
-
-
-    if (botao) {
-
-        botao.classList.add("active");
-
-    }
-
-
-    if (pagina === "dashboard") {
-
-        atualizarDashboard();
-
-    }
-
-
-    if (pagina === "colaboradores") {
-
-        carregarColaboradores();
-
-    }
-
-
-    if (pagina === "historico") {
-
-        carregarHistorico();
-
-    }
+    botao.classList.add("active");
 
 }
 
+if (pagina === "dashboard") {
 
-/* =========================================================
-   CADASTRO DE COLABORADORES
-========================================================= */
+    atualizarDashboard();
 
-async function cadastrarColaborador() {
+}
 
-    const lms = document
-        .getElementById("cadastroLms")
-        .value
-        .trim();
-
-
-    const nome = document
-        .getElementById("cadastroNome")
-        .value
-        .trim();
-
-
-    if (!lms || !nome) {
-
-        alert(
-            "Preencha o LMS e o nome do colaborador."
-        );
-
-        return;
-    }
-
-
-    const lmsNormalizado = lms.toLowerCase();
-
-
-    const existente = colaboradores.find(
-        colaborador =>
-            colaborador.lms.toLowerCase() ===
-            lmsNormalizado
-    );
-
-
-    if (existente) {
-
-        alert(
-            "Este LMS já está cadastrado."
-        );
-
-        return;
-    }
-
-
-    const { data, error } = await db
-        .from("colaboradores")
-        .insert([
-            {
-                lms: lms,
-                nome: nome
-            }
-        ])
-        .select()
-        .single();
-
-
-    if (error) {
-
-        console.error(
-            "Erro ao cadastrar colaborador:",
-            error
-        );
-
-        alert(
-            "Erro ao cadastrar colaborador."
-        );
-
-        return;
-    }
-
-
-    colaboradores.push(data);
-
-
-    document.getElementById(
-        "cadastroLms"
-    ).value = "";
-
-
-    document.getElementById(
-        "cadastroNome"
-    ).value = "";
-
+if (pagina === "colaboradores") {
 
     carregarColaboradores();
 
 }
 
+if (pagina === "historico") {
+
+    paginaHistoricoAtual = 1;
+
+    carregarHistorico();
+
+}
+
+}
 
 /* =========================================================
-   LISTAR COLABORADORES
+CADASTRO DE COLABORADORES
+========================================================= */
+
+async function cadastrarColaborador() {
+
+const lms = document
+    .getElementById("cadastroLms")
+    .value
+    .trim();
+
+const nome = document
+    .getElementById("cadastroNome")
+    .value
+    .trim();
+
+if (!lms || !nome) {
+
+    alert(
+        "Preencha o LMS e o nome do colaborador."
+    );
+
+    return;
+}
+
+const lmsNormalizado = lms.toLowerCase();
+
+const existente = colaboradores.find(
+    colaborador =>
+        colaborador.lms.toLowerCase() ===
+        lmsNormalizado
+);
+
+if (existente) {
+
+    alert(
+        "Este LMS já está cadastrado."
+    );
+
+    return;
+}
+
+const { data, error } = await db
+    .from("colaboradores")
+    .insert([
+        {
+            lms: lms,
+            nome: nome
+        }
+    ])
+    .select()
+    .single();
+
+if (error) {
+
+    console.error(
+        "Erro ao cadastrar colaborador:",
+        error
+    );
+
+    alert(
+        "Erro ao cadastrar colaborador."
+    );
+
+    return;
+}
+
+colaboradores.push(data);
+
+document.getElementById(
+    "cadastroLms"
+).value = "";
+
+document.getElementById(
+    "cadastroNome"
+).value = "";
+
+carregarColaboradores();
+
+}
+
+/* =========================================================
+LISTAR COLABORADORES
 ========================================================= */
 
 async function carregarColaboradores() {
 
-    const campo = document
-        .getElementById("buscaColaborador");
+const campo = document
+    .getElementById("buscaColaborador");
 
+if (!campo) return;
 
-    if (!campo) return;
+const termo = campo
+    .value
+    .trim()
+    .toLowerCase();
 
+const { data, error } = await db
+    .from("colaboradores")
+    .select("*")
+    .order("id", { ascending: true });
 
-    const termo = campo
-        .value
-        .trim()
-        .toLowerCase();
+if (error) {
 
+    console.error(
+        "Erro ao carregar colaboradores:",
+        error
+    );
 
-    const { data, error } = await db
-        .from("colaboradores")
+    return;
+}
+
+colaboradores = data || [];
+
+let lista = colaboradores;
+
+if (termo) {
+
+    lista = colaboradores.filter(
+        colaborador =>
+
+            colaborador.lms
+                .toLowerCase()
+                .includes(termo)
+
+            ||
+
+            colaborador.nome
+                .toLowerCase()
+                .includes(termo)
+    );
+
+}
+
+const tabela = document
+    .getElementById(
+        "tabelaColaboradores"
+    );
+
+if (!lista.length) {
+
+    tabela.innerHTML = `
+
+        <tr>
+
+            <td colspan="3">
+                Nenhum colaborador encontrado.
+            </td>
+
+        </tr>
+
+    `;
+
+    return;
+}
+
+tabela.innerHTML = lista
+    .slice()
+    .reverse()
+    .map(colaborador => `
+
+        <tr>
+
+            <td>
+                ${escaparHTML(colaborador.lms)}
+            </td>
+
+            <td>
+                ${escaparHTML(colaborador.nome)}
+            </td>
+
+            <td>
+
+                <button
+                    class="btn-editar"
+                    onclick="abrirEdicaoColaborador(${colaborador.id})"
+                >
+                    Editar
+                </button>
+
+                <button
+                    class="btn-excluir"
+                    onclick="excluirColaborador(${colaborador.id})"
+                >
+                    Excluir
+                </button>
+
+            </td>
+
+        </tr>
+
+    `)
+    .join("");
+
+}
+
+/* =========================================================
+MOSTRAR TODOS OS COLABORADORES
+========================================================= */
+
+function mostrarTodosColaboradores() {
+
+document.getElementById(
+    "buscaColaborador"
+).value = "";
+
+carregarColaboradores();
+
+}
+
+/* =========================================================
+BUSCAR NOME POR LMS
+========================================================= */
+
+function buscarNomePorLms() {
+
+const campoLms = document
+    .getElementById("lms");
+
+const campoNome = document
+    .getElementById("nome");
+
+const status = document
+    .getElementById("statusLms");
+
+const lms = campoLms
+    .value
+    .trim()
+    .toLowerCase();
+
+campoNome.value = "";
+
+status.textContent = "";
+
+status.className = "status-lms";
+
+if (!lms) {
+
+    return;
+}
+
+const colaborador = colaboradores.find(
+    item =>
+        item.lms.toLowerCase() === lms
+);
+
+if (colaborador) {
+
+    campoNome.value =
+        colaborador.nome;
+
+    status.textContent =
+        "Colaborador encontrado";
+
+    status.classList.add(
+        "sucesso"
+    );
+
+} else {
+
+    status.textContent =
+        "LMS não cadastrado";
+
+    status.classList.add(
+        "erro"
+    );
+
+}
+
+}
+
+/* =========================================================
+REGISTRAR RETIRADA
+========================================================= */
+
+async function registrarRetirada() {
+
+const lms = document
+    .getElementById("lms")
+    .value
+    .trim();
+
+const nome = document
+    .getElementById("nome")
+    .value
+    .trim();
+
+const codigo = document
+    .getElementById("codigo")
+    .value
+    .trim();
+
+const observacao = document
+    .getElementById("observacao")
+    .value
+    .trim();
+
+if (!lms || !codigo) {
+
+    alert(
+        "Preencha o LMS e o código do equipamento."
+    );
+
+    return;
+}
+
+if (!nome) {
+
+    alert(
+        "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
+    );
+
+    return;
+}
+
+const { data: equipamentoExistente, error: erroBusca } =
+    await db
+        .from("registros")
         .select("*")
-        .order("id", { ascending: true });
+        .ilike("codigo", codigo)
+        .eq("status", "retirado")
+        .limit(1);
 
+if (erroBusca) {
 
-    if (error) {
+    console.error(
+        "Erro ao verificar equipamento:",
+        erroBusca
+    );
 
-        console.error(
-            "Erro ao carregar colaboradores:",
-            error
-        );
+    alert(
+        "Erro ao verificar o equipamento."
+    );
 
-        return;
-    }
+    return;
+}
 
+if (
+    equipamentoExistente &&
+    equipamentoExistente.length > 0
+) {
 
-    colaboradores = data || [];
+    alert(
+        "Este equipamento já está registrado como retirado."
+    );
 
+    return;
+}
 
-    let lista = colaboradores;
+const { data, error } = await db
+    .from("registros")
+    .insert([
+        {
+            lms: lms,
+            nome: nome,
+            codigo: codigo,
+            observacao: observacao || null,
+            retirada: new Date().toISOString(),
+            devolucao: null,
+            status: "retirado"
+        }
+    ])
+    .select()
+    .single();
 
+if (error) {
 
-    if (termo) {
+    console.error(
+        "Erro ao registrar retirada:",
+        error
+    );
 
-        lista = colaboradores.filter(
-            colaborador =>
+    alert(
+        "Erro ao registrar a retirada."
+    );
 
-                colaborador.lms
-                    .toLowerCase()
-                    .includes(termo)
+    return;
+}
 
-                ||
+registros.push(data);
 
-                colaborador.nome
-                    .toLowerCase()
-                    .includes(termo)
-        );
+document.getElementById("lms").value = "";
 
-    }
+document.getElementById("nome").value = "";
 
+document.getElementById("codigo").value = "";
 
-    const tabela = document
-        .getElementById(
-            "tabelaColaboradores"
-        );
+document.getElementById("observacao").value = "";
 
+document.getElementById("statusLms").textContent = "";
 
-    if (!lista.length) {
+document.getElementById("statusLms").className =
+    "status-lms";
 
-        tabela.innerHTML = `
+atualizarDashboard();
 
-            <tr>
+carregarHistorico();
 
-                <td colspan="3">
-                    Nenhum colaborador encontrado.
-                </td>
+}
 
-            </tr>
+/* =========================================================
+DASHBOARD
+========================================================= */
 
-        `;
+function atualizarDashboard() {
 
-        return;
-    }
+const retirados = registros.filter(
+    item => item.status === "retirado"
+).length;
 
+const devolvidos = registros.filter(
+    item => item.status === "devolvido"
+).length;
 
-    tabela.innerHTML = lista
-        .slice()
-        .reverse()
-        .map(colaborador => `
+const extraviados = registros.filter(
+    item => item.status === "extraviado"
+).length;
 
-            <tr>
+document.getElementById(
+    "totalRetirados"
+).textContent = retirados;
 
-                <td>
-                    ${escaparHTML(colaborador.lms)}
-                </td>
+document.getElementById(
+    "totalDevolvidos"
+).textContent = devolvidos;
 
-                <td>
-                    ${escaparHTML(colaborador.nome)}
-                </td>
+document.getElementById(
+    "totalExtraviados"
+).textContent = extraviados;
 
-                <td>
+}
 
-                    <button
-                        class="btn-editar"
-                        onclick="abrirEdicaoColaborador(${colaborador.id})"
+/* =========================================================
+BUSCA DASHBOARD
+========================================================= */
+
+function buscarDashboard() {
+
+const termo = document
+    .getElementById("buscaDashboard")
+    .value
+    .trim()
+    .toLowerCase();
+
+const resultado = document
+    .getElementById(
+        "resultadoDashboard"
+    );
+
+if (!termo) {
+
+    resultado.innerHTML = "";
+
+    return;
+}
+
+const encontrados = registros.filter(
+    item =>
+
+        item.lms
+            .toLowerCase()
+            .includes(termo)
+
+        ||
+
+        item.nome
+            .toLowerCase()
+            .includes(termo)
+
+        ||
+
+        item.codigo
+            .toLowerCase()
+            .includes(termo)
+);
+
+if (!encontrados.length) {
+
+    resultado.innerHTML = `
+
+        <div class="resultado">
+            Nenhum registro encontrado.
+        </div>
+
+    `;
+
+    return;
+}
+
+resultado.innerHTML =
+    encontrados
+        .map(item => `
+
+            <div class="resultado">
+
+                <strong>
+                    ${escaparHTML(item.nome)}
+                </strong>
+
+                <div>
+                    LMS:
+                    ${escaparHTML(item.lms)}
+                </div>
+
+                <div>
+                    Equipamento:
+                    ${escaparHTML(item.codigo)}
+                </div>
+
+                <div>
+
+                    Status:
+
+                    <span
+                        class="status ${item.status}"
                     >
-                        Editar
-                    </button>
+                        ${formatarStatus(item.status)}
+                    </span>
 
+                </div>
 
-                    <button
-                        class="btn-excluir"
-                        onclick="excluirColaborador(${colaborador.id})"
-                    >
-                        Excluir
-                    </button>
+                <div>
+                    Retirada:
+                    ${formatarData(item.retirada)}
+                </div>
 
-                </td>
+                <div>
+                    Devolução:
+                    ${
+                        item.devolucao
+                        ? formatarData(item.devolucao)
+                        : "-"
+                    }
+                </div>
 
-            </tr>
+                ${
+                    item.observacao
+                    ?
+                    `
+                        <div>
+                            Observação:
+                            ${escaparHTML(item.observacao)}
+                        </div>
+                    `
+                    :
+                    ""
+                }
+
+            </div>
 
         `)
         .join("");
 
 }
 
-
 /* =========================================================
-   MOSTRAR TODOS OS COLABORADORES
-========================================================= */
-
-function mostrarTodosColaboradores() {
-
-    document.getElementById(
-        "buscaColaborador"
-    ).value = "";
-
-
-    carregarColaboradores();
-
-}
-
-
-/* =========================================================
-   BUSCAR NOME POR LMS
-========================================================= */
-
-function buscarNomePorLms() {
-
-    const campoLms = document
-        .getElementById("lms");
-
-
-    const campoNome = document
-        .getElementById("nome");
-
-
-    const status = document
-        .getElementById("statusLms");
-
-
-    const lms = campoLms
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    campoNome.value = "";
-
-    status.textContent = "";
-
-    status.className = "status-lms";
-
-
-    if (!lms) {
-
-        return;
-    }
-
-
-    const colaborador = colaboradores.find(
-        item =>
-            item.lms.toLowerCase() === lms
-    );
-
-
-    if (colaborador) {
-
-        campoNome.value =
-            colaborador.nome;
-
-
-        status.textContent =
-            "Colaborador encontrado";
-
-
-        status.classList.add(
-            "sucesso"
-        );
-
-    } else {
-
-        status.textContent =
-            "LMS não cadastrado";
-
-
-        status.classList.add(
-            "erro"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REGISTRAR RETIRADA
-========================================================= */
-
-async function registrarRetirada() {
-
-    const lms = document
-        .getElementById("lms")
-        .value
-        .trim();
-
-
-    const nome = document
-        .getElementById("nome")
-        .value
-        .trim();
-
-
-    const codigo = document
-        .getElementById("codigo")
-        .value
-        .trim();
-
-
-    const observacao = document
-        .getElementById("observacao")
-        .value
-        .trim();
-
-
-    if (!lms || !codigo) {
-
-        alert(
-            "Preencha o LMS e o código do equipamento."
-        );
-
-        return;
-    }
-
-
-    if (!nome) {
-
-        alert(
-            "O LMS informado não está cadastrado. Cadastre o colaborador primeiro."
-        );
-
-        return;
-    }
-
-
-    const { data: equipamentoExistente, error: erroBusca } =
-        await db
-            .from("registros")
-            .select("*")
-            .ilike("codigo", codigo)
-            .eq("status", "retirado")
-            .limit(1);
-
-
-    if (erroBusca) {
-
-        console.error(
-            "Erro ao verificar equipamento:",
-            erroBusca
-        );
-
-        alert(
-            "Erro ao verificar o equipamento."
-        );
-
-        return;
-    }
-
-
-    if (
-        equipamentoExistente &&
-        equipamentoExistente.length > 0
-    ) {
-
-        alert(
-            "Este equipamento já está registrado como retirado."
-        );
-
-        return;
-    }
-
-
-    const { data, error } = await db
-        .from("registros")
-        .insert([
-            {
-                lms: lms,
-                nome: nome,
-                codigo: codigo,
-                observacao: observacao || null,
-                retirada: new Date().toISOString(),
-                devolucao: null,
-                status: "retirado"
-            }
-        ])
-        .select()
-        .single();
-
-
-    if (error) {
-
-        console.error(
-            "Erro ao registrar retirada:",
-            error
-        );
-
-        alert(
-            "Erro ao registrar a retirada."
-        );
-
-        return;
-    }
-
-
-    registros.push(data);
-
-
-    document.getElementById("lms").value = "";
-
-    document.getElementById("nome").value = "";
-
-    document.getElementById("codigo").value = "";
-
-    document.getElementById("observacao").value = "";
-
-    document.getElementById("statusLms").textContent = "";
-
-    document.getElementById("statusLms").className =
-        "status-lms";
-
-
-    atualizarDashboard();
-
-    carregarHistorico();
-
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function atualizarDashboard() {
-
-    const retirados = registros.filter(
-        item => item.status === "retirado"
-    ).length;
-
-
-    const devolvidos = registros.filter(
-        item => item.status === "devolvido"
-    ).length;
-
-
-    const extraviados = registros.filter(
-        item => item.status === "extraviado"
-    ).length;
-
-
-    document.getElementById(
-        "totalRetirados"
-    ).textContent = retirados;
-
-
-    document.getElementById(
-        "totalDevolvidos"
-    ).textContent = devolvidos;
-
-
-    document.getElementById(
-        "totalExtraviados"
-    ).textContent = extraviados;
-
-}
-
-
-/* =========================================================
-   BUSCA DASHBOARD
-========================================================= */
-
-function buscarDashboard() {
-
-    const termo = document
-        .getElementById("buscaDashboard")
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    const resultado = document
-        .getElementById(
-            "resultadoDashboard"
-        );
-
-
-    if (!termo) {
-
-        resultado.innerHTML = "";
-
-        return;
-    }
-
-
-    const encontrados = registros.filter(
-        item =>
-
-            item.lms
-                .toLowerCase()
-                .includes(termo)
-
-            ||
-
-            item.nome
-                .toLowerCase()
-                .includes(termo)
-
-            ||
-
-            item.codigo
-                .toLowerCase()
-                .includes(termo)
-    );
-
-
-    if (!encontrados.length) {
-
-        resultado.innerHTML = `
-
-            <div class="resultado">
-                Nenhum registro encontrado.
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    resultado.innerHTML =
-        encontrados
-            .map(item => `
-
-                <div class="resultado">
-
-                    <strong>
-                        ${escaparHTML(item.nome)}
-                    </strong>
-
-                    <div>
-                        LMS:
-                        ${escaparHTML(item.lms)}
-                    </div>
-
-                    <div>
-                        Equipamento:
-                        ${escaparHTML(item.codigo)}
-                    </div>
-
-                    <div>
-
-                        Status:
-
-                        <span
-                            class="status ${item.status}"
-                        >
-                            ${formatarStatus(item.status)}
-                        </span>
-
-                    </div>
-
-                    <div>
-                        Retirada:
-                        ${formatarData(item.retirada)}
-                    </div>
-
-                    <div>
-                        Devolução:
-                        ${
-                            item.devolucao
-                            ? formatarData(item.devolucao)
-                            : "-"
-                        }
-                    </div>
-
-                    ${
-                        item.observacao
-                        ?
-                        `
-                            <div>
-                                Observação:
-                                ${escaparHTML(item.observacao)}
-                            </div>
-                        `
-                        :
-                        ""
-                    }
-
-                </div>
-
-            `)
-            .join("");
-
-}
-
-
-/* =========================================================
-   BUSCA NA RETIRADA
+BUSCA NA RETIRADA
+SOMENTE STATUS "RETIRADO"
 ========================================================= */
 
 function buscarRetirada() {
 
-    const lms = document
-        .getElementById("lms")
-        .value
-        .trim()
-        .toLowerCase();
+const lms = document
+    .getElementById("lms")
+    .value
+    .trim()
+    .toLowerCase();
 
+const codigo = document
+    .getElementById("codigo")
+    .value
+    .trim()
+    .toLowerCase();
 
-    const codigo = document
-        .getElementById("codigo")
-        .value
-        .trim()
-        .toLowerCase();
+const nome = document
+    .getElementById("nome")
+    .value
+    .trim()
+    .toLowerCase();
 
+const resultado = document
+    .getElementById(
+        "resultadoRetirada"
+    );
 
-    const nome = document
-        .getElementById("nome")
-        .value
-        .trim()
-        .toLowerCase();
+if (!lms && !codigo && !nome) {
 
+    resultado.innerHTML = "";
 
-    const resultado = document
-        .getElementById(
-            "resultadoRetirada"
-        );
+    return;
+}
 
+const encontrados = registros.filter(
+    item => {
 
-    if (!lms && !codigo && !nome) {
+        // SOMENTE EQUIPAMENTOS COM STATUS RETIRADO
+        if (item.status !== "retirado") {
+            return false;
+        }
 
-        resultado.innerHTML = "";
-
-        return;
-    }
-
-
-    const encontrados = registros.filter(
-        item =>
+        return (
 
             (lms &&
                 item.lms
@@ -814,72 +751,265 @@ function buscarRetirada() {
                 item.nome
                     .toLowerCase()
                     .includes(nome))
-    );
 
+        );
 
-    if (!encontrados.length) {
+    }
+);
 
-        resultado.innerHTML = `
+if (!encontrados.length) {
+
+    resultado.innerHTML = `
+
+        <div class="resultado">
+            Nenhum equipamento retirado encontrado.
+        </div>
+
+    `;
+
+    return;
+}
+
+resultado.innerHTML =
+    encontrados
+        .map(item => `
 
             <div class="resultado">
-                Nenhum registro encontrado.
+
+                <strong>
+                    ${escaparHTML(item.nome)}
+                </strong>
+
+                <div>
+                    LMS:
+                    ${escaparHTML(item.lms)}
+                </div>
+
+                <div>
+                    Equipamento:
+                    ${escaparHTML(item.codigo)}
+                </div>
+
+                <div>
+
+                    Status:
+
+                    <span
+                        class="status ${item.status}"
+                    >
+                        ${formatarStatus(item.status)}
+                    </span>
+
+                </div>
+
+                ${
+                    item.observacao
+                    ?
+                    `
+                        <div>
+                            Observação:
+                            ${escaparHTML(item.observacao)}
+                        </div>
+                    `
+                    :
+                    ""
+                }
+
+                <br>
+
+                <button
+                    class="btn-editar"
+                    onclick="abrirEdicao(${item.id})"
+                >
+                    Editar
+                </button>
+
             </div>
 
-        `;
+        `)
+        .join("");
 
-        return;
-    }
+}
 
+/* =========================================================
+HISTÓRICO
+========================================================= */
 
-    resultado.innerHTML =
-        encontrados
-            .map(item => `
+async function carregarHistorico() {
 
-                <div class="resultado">
+const campo = document
+    .getElementById("buscaHistorico");
 
-                    <strong>
-                        ${escaparHTML(item.nome)}
-                    </strong>
+if (!campo) return;
 
-                    <div>
-                        LMS:
-                        ${escaparHTML(item.lms)}
-                    </div>
+const termo = campo
+    .value
+    .trim()
+    .toLowerCase();
 
-                    <div>
-                        Equipamento:
-                        ${escaparHTML(item.codigo)}
-                    </div>
+const { data, error } = await db
+    .from("registros")
+    .select("*")
+    .order("id", { ascending: true });
 
-                    <div>
+if (error) {
 
-                        Status:
+    console.error(
+        "Erro ao carregar histórico:",
+        error
+    );
 
-                        <span
-                            class="status ${item.status}"
-                        >
-                            ${formatarStatus(item.status)}
-                        </span>
+    return;
+}
 
-                    </div>
+registros = data || [];
 
+let lista = registros;
+
+if (termo) {
+
+    lista = registros.filter(
+        item =>
+
+            item.lms
+                .toLowerCase()
+                .includes(termo)
+
+            ||
+
+            item.nome
+                .toLowerCase()
+                .includes(termo)
+
+            ||
+
+            item.codigo
+                .toLowerCase()
+                .includes(termo)
+    );
+
+}
+
+const tabela = document
+    .getElementById(
+        "tabelaHistorico"
+    );
+
+if (!lista.length) {
+
+    tabela.innerHTML = `
+
+        <tr>
+
+            <td colspan="8">
+                Nenhum registro encontrado.
+            </td>
+
+        </tr>
+
+    `;
+
+    atualizarPaginacaoHistorico(0);
+
+    return;
+}
+
+/*
+   =====================================================
+   PAGINAÇÃO DE 40 REGISTROS
+   =====================================================
+*/
+
+const listaOrdenada =
+    lista
+        .slice()
+        .reverse();
+
+const totalPaginas =
+    Math.ceil(
+        listaOrdenada.length /
+        REGISTROS_POR_PAGINA
+    );
+
+if (paginaHistoricoAtual < 1) {
+
+    paginaHistoricoAtual = 1;
+
+}
+
+if (
+    paginaHistoricoAtual > totalPaginas
+) {
+
+    paginaHistoricoAtual = totalPaginas;
+
+}
+
+const inicio =
+    (paginaHistoricoAtual - 1) *
+    REGISTROS_POR_PAGINA;
+
+const fim =
+    inicio +
+    REGISTROS_POR_PAGINA;
+
+const listaPagina =
+    listaOrdenada.slice(
+        inicio,
+        fim
+    );
+
+tabela.innerHTML =
+    listaPagina
+        .map(item => `
+
+            <tr>
+
+                <td>
+                    ${escaparHTML(item.lms)}
+                </td>
+
+                <td>
+                    ${escaparHTML(item.nome)}
+                </td>
+
+                <td>
+                    ${escaparHTML(item.codigo)}
+                </td>
+
+                <td>
+                    ${formatarData(item.retirada)}
+                </td>
+
+                <td>
+                    ${
+                        item.devolucao
+                        ? formatarData(item.devolucao)
+                        : "-"
+                    }
+                </td>
+
+                <td>
+
+                    <span
+                        class="status ${item.status}"
+                    >
+                        ${formatarStatus(item.status)}
+                    </span>
+
+                </td>
+
+                <td class="observacao-tabela">
 
                     ${
                         item.observacao
-                        ?
-                        `
-                            <div>
-                                Observação:
-                                ${escaparHTML(item.observacao)}
-                            </div>
-                        `
-                        :
-                        ""
+                        ? escaparHTML(item.observacao)
+                        : "-"
                     }
 
+                </td>
 
-                    <br>
-
+                <td>
 
                     <button
                         class="btn-editar"
@@ -888,829 +1018,726 @@ function buscarRetirada() {
                         Editar
                     </button>
 
-                </div>
+                    <button
+                        class="btn-excluir"
+                        onclick="excluirRegistro(${item.id})"
+                    >
+                        Excluir
+                    </button>
 
-            `)
-            .join("");
-
-}
-
-
-/* =========================================================
-   HISTÓRICO
-========================================================= */
-
-async function carregarHistorico() {
-
-    const campo = document
-        .getElementById("buscaHistorico");
-
-
-    if (!campo) return;
-
-
-    const termo = campo
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    const { data, error } = await db
-        .from("registros")
-        .select("*")
-        .order("id", { ascending: true });
-
-
-    if (error) {
-
-        console.error(
-            "Erro ao carregar histórico:",
-            error
-        );
-
-        return;
-    }
-
-
-    registros = data || [];
-
-
-    let lista = registros;
-
-
-    if (termo) {
-
-        lista = registros.filter(
-            item =>
-
-                item.lms
-                    .toLowerCase()
-                    .includes(termo)
-
-                ||
-
-                item.nome
-                    .toLowerCase()
-                    .includes(termo)
-
-                ||
-
-                item.codigo
-                    .toLowerCase()
-                    .includes(termo)
-        );
-
-    }
-
-
-    const tabela = document
-        .getElementById(
-            "tabelaHistorico"
-        );
-
-
-    if (!lista.length) {
-
-        tabela.innerHTML = `
-
-            <tr>
-
-                <td colspan="8">
-                    Nenhum registro encontrado.
                 </td>
 
             </tr>
 
-        `;
+        `)
+        .join("");
 
-        return;
-    }
-
-
-    tabela.innerHTML =
-        lista
-            .slice()
-            .reverse()
-            .map(item => `
-
-                <tr>
-
-                    <td>
-                        ${escaparHTML(item.lms)}
-                    </td>
-
-
-                    <td>
-                        ${escaparHTML(item.nome)}
-                    </td>
-
-
-                    <td>
-                        ${escaparHTML(item.codigo)}
-                    </td>
-
-
-                    <td>
-                        ${formatarData(item.retirada)}
-                    </td>
-
-
-                    <td>
-                        ${
-                            item.devolucao
-                            ? formatarData(item.devolucao)
-                            : "-"
-                        }
-                    </td>
-
-
-                    <td>
-
-                        <span
-                            class="status ${item.status}"
-                        >
-                            ${formatarStatus(item.status)}
-                        </span>
-
-                    </td>
-
-
-                    <td class="observacao-tabela">
-
-                        ${
-                            item.observacao
-                            ? escaparHTML(item.observacao)
-                            : "-"
-                        }
-
-                    </td>
-
-
-                    <td>
-
-                        <button
-                            class="btn-editar"
-                            onclick="abrirEdicao(${item.id})"
-                        >
-                            Editar
-                        </button>
-
-
-                        <button
-                            class="btn-excluir"
-                            onclick="excluirRegistro(${item.id})"
-                        >
-                            Excluir
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            `)
-            .join("");
+atualizarPaginacaoHistorico(
+    listaOrdenada.length
+);
 
 }
 
+/* =========================================================
+PAGINAÇÃO DO HISTÓRICO
+========================================================= */
+
+function atualizarPaginacaoHistorico(totalRegistros) {
+
+const tabela = document.getElementById(
+    "tabelaHistorico"
+);
+
+if (!tabela) return;
+
+const containerTabela =
+    tabela.closest(".tabela-container");
+
+if (!containerTabela) return;
+
+let paginacao =
+    document.getElementById(
+        "paginacaoHistorico"
+    );
+
+if (!paginacao) {
+
+    paginacao =
+        document.createElement("div");
+
+    paginacao.id =
+        "paginacaoHistorico";
+
+    paginacao.style.display =
+        "flex";
+
+    paginacao.style.alignItems =
+        "center";
+
+    paginacao.style.justifyContent =
+        "center";
+
+    paginacao.style.gap =
+        "10px";
+
+    paginacao.style.marginTop =
+        "20px";
+
+    containerTabela.parentNode.insertBefore(
+        paginacao,
+        containerTabela.nextSibling
+    );
+
+}
+
+if (!totalRegistros) {
+
+    paginacao.innerHTML = "";
+
+    paginacao.style.display = "none";
+
+    return;
+
+}
+
+const totalPaginas =
+    Math.ceil(
+        totalRegistros /
+        REGISTROS_POR_PAGINA
+    );
+
+if (totalPaginas <= 1) {
+
+    paginacao.innerHTML = "";
+
+    paginacao.style.display = "none";
+
+    return;
+
+}
+
+paginacao.style.display =
+    "flex";
+
+paginacao.innerHTML = `
+
+    <button
+        class="btn-secundario"
+        onclick="paginaHistoricoAnterior()"
+        ${paginaHistoricoAtual <= 1 ? "disabled" : ""}
+    >
+        Anterior
+    </button>
+
+    <span>
+        Página
+        <strong>${paginaHistoricoAtual}</strong>
+        de
+        <strong>${totalPaginas}</strong>
+    </span>
+
+    <button
+        class="btn-secundario"
+        onclick="paginaHistoricoProxima()"
+        ${paginaHistoricoAtual >= totalPaginas ? "disabled" : ""}
+    >
+        Próxima
+    </button>
+
+`;
+
+}
 
 /* =========================================================
-   MOSTRAR TODOS
+PÁGINA ANTERIOR
+========================================================= */
+
+function paginaHistoricoAnterior() {
+
+if (paginaHistoricoAtual <= 1) {
+    return;
+}
+
+paginaHistoricoAtual--;
+
+carregarHistorico();
+
+}
+
+/* =========================================================
+PRÓXIMA PÁGINA
+========================================================= */
+
+function paginaHistoricoProxima() {
+
+carregarHistorico();
+
+}
+
+/* =========================================================
+MOSTRAR TODOS
 ========================================================= */
 
 function mostrarTodos() {
 
-    document.getElementById(
-        "buscaHistorico"
-    ).value = "";
+document.getElementById(
+    "buscaHistorico"
+).value = "";
 
+paginaHistoricoAtual = 1;
 
-    carregarHistorico();
+carregarHistorico();
 
 }
 
-
 /* =========================================================
-   EDITAR REGISTRO
+EDITAR REGISTRO
 ========================================================= */
 
 function abrirEdicao(id) {
 
-    const registro = registros.find(
-        item => Number(item.id) === Number(id)
-    );
+const registro = registros.find(
+    item => Number(item.id) === Number(id)
+);
 
+if (!registro) return;
 
-    if (!registro) return;
+document.getElementById(
+    "editarId"
+).value = registro.id;
 
+document.getElementById(
+    "editarLms"
+).value = registro.lms;
 
-    document.getElementById(
-        "editarId"
-    ).value = registro.id;
+document.getElementById(
+    "editarNome"
+).value = registro.nome;
 
+document.getElementById(
+    "editarCodigo"
+).value = registro.codigo;
 
-    document.getElementById(
-        "editarLms"
-    ).value = registro.lms;
+document.getElementById(
+    "editarStatus"
+).value = registro.status;
 
+document.getElementById(
+    "editarObservacao"
+).value =
+    registro.observacao || "";
 
-    document.getElementById(
-        "editarNome"
-    ).value = registro.nome;
-
-
-    document.getElementById(
-        "editarCodigo"
-    ).value = registro.codigo;
-
-
-    document.getElementById(
-        "editarStatus"
-    ).value = registro.status;
-
-
-    document.getElementById(
-        "editarObservacao"
-    ).value =
-        registro.observacao || "";
-
-
-    document
-        .getElementById("modalEdicao")
-        .classList.add("aberto");
+document
+    .getElementById("modalEdicao")
+    .classList.add("aberto");
 
 }
 
-
 async function salvarEdicao() {
 
-    const id = Number(
-        document.getElementById(
-            "editarId"
-        ).value
+const id = Number(
+    document.getElementById(
+        "editarId"
+    ).value
+);
+
+const lms = document
+    .getElementById("editarLms")
+    .value
+    .trim();
+
+const nome = document
+    .getElementById("editarNome")
+    .value
+    .trim();
+
+const codigo = document
+    .getElementById("editarCodigo")
+    .value
+    .trim();
+
+const observacao = document
+    .getElementById("editarObservacao")
+    .value
+    .trim();
+
+const novoStatus =
+    document.getElementById(
+        "editarStatus"
+    ).value;
+
+if (!lms || !nome || !codigo) {
+
+    alert(
+        "Preencha o LMS, nome e código do equipamento."
     );
 
+    return;
+}
 
-    const lms = document
-        .getElementById("editarLms")
-        .value
-        .trim();
+const registro = registros.find(
+    item => Number(item.id) === id
+);
 
+if (!registro) return;
 
-    const nome = document
-        .getElementById("editarNome")
-        .value
-        .trim();
+let devolucao = registro.devolucao;
 
+if (
+    novoStatus === "devolvido" &&
+    !devolucao
+) {
 
-    const codigo = document
-        .getElementById("editarCodigo")
-        .value
-        .trim();
+    devolucao =
+        new Date().toISOString();
 
+}
 
-    const observacao = document
-        .getElementById("editarObservacao")
-        .value
-        .trim();
+if (
+    novoStatus !== "devolvido"
+) {
 
+    devolucao = null;
 
-    const novoStatus =
-        document.getElementById(
-            "editarStatus"
-        ).value;
+}
 
+const { data, error } = await db
+    .from("registros")
+    .update({
 
-    if (!lms || !nome || !codigo) {
+        lms: lms,
 
-        alert(
-            "Preencha o LMS, nome e código do equipamento."
-        );
+        nome: nome,
 
-        return;
-    }
+        codigo: codigo,
 
+        observacao:
+            observacao || null,
 
-    const registro = registros.find(
+        status: novoStatus,
+
+        devolucao: devolucao
+
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+if (error) {
+
+    console.error(
+        "Erro ao editar registro:",
+        error
+    );
+
+    alert(
+        "Erro ao salvar as alterações."
+    );
+
+    return;
+}
+
+const indice = registros.findIndex(
+    item => Number(item.id) === id
+);
+
+if (indice !== -1) {
+
+    registros[indice] = data;
+
+}
+
+fecharModal();
+
+atualizarDashboard();
+
+carregarHistorico();
+
+}
+
+/* =========================================================
+FECHAR MODAL DE REGISTRO
+========================================================= */
+
+function fecharModal() {
+
+document
+    .getElementById("modalEdicao")
+    .classList.remove("aberto");
+
+}
+
+/* =========================================================
+EXCLUIR REGISTRO
+========================================================= */
+
+async function excluirRegistro(id) {
+
+const confirmar = confirm(
+    "Tem certeza que deseja excluir este registro?"
+);
+
+if (!confirmar) return;
+
+const { error } = await db
+    .from("registros")
+    .delete()
+    .eq("id", id);
+
+if (error) {
+
+    console.error(
+        "Erro ao excluir registro:",
+        error
+    );
+
+    alert(
+        "Erro ao excluir o registro."
+    );
+
+    return;
+}
+
+registros = registros.filter(
+    item => Number(item.id) !== Number(id)
+);
+
+atualizarDashboard();
+
+carregarHistorico();
+
+}
+
+/* =========================================================
+EDITAR COLABORADOR
+========================================================= */
+
+function abrirEdicaoColaborador(id) {
+
+const colaborador =
+    colaboradores.find(
+        item => Number(item.id) === Number(id)
+    );
+
+if (!colaborador) return;
+
+document.getElementById(
+    "editarColaboradorId"
+).value = colaborador.id;
+
+document.getElementById(
+    "editarColaboradorLms"
+).value = colaborador.lms;
+
+document.getElementById(
+    "editarColaboradorNome"
+).value = colaborador.nome;
+
+document
+    .getElementById(
+        "modalColaborador"
+    )
+    .classList.add("aberto");
+
+}
+
+async function salvarEdicaoColaborador() {
+
+const id = Number(
+    document.getElementById(
+        "editarColaboradorId"
+    ).value
+);
+
+const lms = document
+    .getElementById(
+        "editarColaboradorLms"
+    )
+    .value
+    .trim();
+
+const nome = document
+    .getElementById(
+        "editarColaboradorNome"
+    )
+    .value
+    .trim();
+
+if (!lms || !nome) {
+
+    alert(
+        "Preencha o LMS e o nome."
+    );
+
+    return;
+}
+
+const outroColaborador =
+    colaboradores.find(
+        item =>
+            Number(item.id) !== id &&
+            item.lms.toLowerCase() ===
+            lms.toLowerCase()
+    );
+
+if (outroColaborador) {
+
+    alert(
+        "Este LMS já pertence a outro colaborador."
+    );
+
+    return;
+}
+
+const colaborador =
+    colaboradores.find(
         item => Number(item.id) === id
     );
 
+if (!colaborador) return;
 
-    if (!registro) return;
+const lmsAntigo =
+    colaborador.lms;
 
+const { error: erroColaborador } =
+    await db
+        .from("colaboradores")
+        .update({
 
-    let devolucao = registro.devolucao;
+            lms: lms,
 
+            nome: nome
 
-    if (
-        novoStatus === "devolvido" &&
-        !devolucao
-    ) {
+        })
+        .eq("id", id);
 
-        devolucao =
-            new Date().toISOString();
+if (erroColaborador) {
 
-    }
+    console.error(
+        "Erro ao editar colaborador:",
+        erroColaborador
+    );
 
+    alert(
+        "Erro ao salvar o colaborador."
+    );
 
-    if (
-        novoStatus !== "devolvido"
-    ) {
+    return;
+}
 
-        devolucao = null;
-
-    }
-
-
-    const { data, error } = await db
+const { error: erroRegistros } =
+    await db
         .from("registros")
         .update({
 
             lms: lms,
 
-            nome: nome,
-
-            codigo: codigo,
-
-            observacao:
-                observacao || null,
-
-            status: novoStatus,
-
-            devolucao: devolucao
+            nome: nome
 
         })
-        .eq("id", id)
-        .select()
-        .single();
+        .ilike("lms", lmsAntigo);
 
+if (erroRegistros) {
 
-    if (error) {
-
-        console.error(
-            "Erro ao editar registro:",
-            error
-        );
-
-        alert(
-            "Erro ao salvar as alterações."
-        );
-
-        return;
-    }
-
-
-    const indice = registros.findIndex(
-        item => Number(item.id) === id
+    console.error(
+        "Erro ao atualizar registros:",
+        erroRegistros
     );
 
-
-    if (indice !== -1) {
-
-        registros[indice] = data;
-
-    }
-
-
-    fecharModal();
-
-    atualizarDashboard();
-
-    carregarHistorico();
+    alert(
+        "O colaborador foi atualizado, mas ocorreu um erro ao atualizar os registros antigos."
+    );
 
 }
 
+colaboradores =
+    colaboradores.map(item => {
 
-/* =========================================================
-   FECHAR MODAL DE REGISTRO
-========================================================= */
+        if (Number(item.id) === id) {
 
-function fecharModal() {
-
-    document
-        .getElementById("modalEdicao")
-        .classList.remove("aberto");
-
-}
-
-
-/* =========================================================
-   EXCLUIR REGISTRO
-========================================================= */
-
-async function excluirRegistro(id) {
-
-    const confirmar = confirm(
-        "Tem certeza que deseja excluir este registro?"
-    );
-
-
-    if (!confirmar) return;
-
-
-    const { error } = await db
-        .from("registros")
-        .delete()
-        .eq("id", id);
-
-
-    if (error) {
-
-        console.error(
-            "Erro ao excluir registro:",
-            error
-        );
-
-        alert(
-            "Erro ao excluir o registro."
-        );
-
-        return;
-    }
-
-
-    registros = registros.filter(
-        item => Number(item.id) !== Number(id)
-    );
-
-
-    atualizarDashboard();
-
-    carregarHistorico();
-
-}
-
-
-/* =========================================================
-   EDITAR COLABORADOR
-========================================================= */
-
-function abrirEdicaoColaborador(id) {
-
-    const colaborador =
-        colaboradores.find(
-            item => Number(item.id) === Number(id)
-        );
-
-
-    if (!colaborador) return;
-
-
-    document.getElementById(
-        "editarColaboradorId"
-    ).value = colaborador.id;
-
-
-    document.getElementById(
-        "editarColaboradorLms"
-    ).value = colaborador.lms;
-
-
-    document.getElementById(
-        "editarColaboradorNome"
-    ).value = colaborador.nome;
-
-
-    document
-        .getElementById(
-            "modalColaborador"
-        )
-        .classList.add("aberto");
-
-}
-
-
-async function salvarEdicaoColaborador() {
-
-    const id = Number(
-        document.getElementById(
-            "editarColaboradorId"
-        ).value
-    );
-
-
-    const lms = document
-        .getElementById(
-            "editarColaboradorLms"
-        )
-        .value
-        .trim();
-
-
-    const nome = document
-        .getElementById(
-            "editarColaboradorNome"
-        )
-        .value
-        .trim();
-
-
-    if (!lms || !nome) {
-
-        alert(
-            "Preencha o LMS e o nome."
-        );
-
-        return;
-    }
-
-
-    const outroColaborador =
-        colaboradores.find(
-            item =>
-                Number(item.id) !== id &&
-                item.lms.toLowerCase() ===
-                lms.toLowerCase()
-        );
-
-
-    if (outroColaborador) {
-
-        alert(
-            "Este LMS já pertence a outro colaborador."
-        );
-
-        return;
-    }
-
-
-    const colaborador =
-        colaboradores.find(
-            item => Number(item.id) === id
-        );
-
-
-    if (!colaborador) return;
-
-
-    const lmsAntigo =
-        colaborador.lms;
-
-
-    const { error: erroColaborador } =
-        await db
-            .from("colaboradores")
-            .update({
-
+            return {
+                ...item,
                 lms: lms,
-
                 nome: nome
+            };
 
-            })
-            .eq("id", id);
+        }
 
+        return item;
 
-    if (erroColaborador) {
+    });
 
-        console.error(
-            "Erro ao editar colaborador:",
-            erroColaborador
-        );
+registros =
+    registros.map(item => {
 
-        alert(
-            "Erro ao salvar o colaborador."
-        );
+        if (
+            item.lms.toLowerCase() ===
+            lmsAntigo.toLowerCase()
+        ) {
 
-        return;
-    }
-
-
-    /*
-       Atualiza também os registros antigos
-       desse colaborador.
-    */
-
-    const { error: erroRegistros } =
-        await db
-            .from("registros")
-            .update({
-
+            return {
+                ...item,
                 lms: lms,
-
                 nome: nome
+            };
 
-            })
-            .ilike("lms", lmsAntigo);
+        }
 
+        return item;
 
-    if (erroRegistros) {
+    });
 
-        console.error(
-            "Erro ao atualizar registros:",
-            erroRegistros
-        );
+fecharModalColaborador();
 
-        alert(
-            "O colaborador foi atualizado, mas ocorreu um erro ao atualizar os registros antigos."
-        );
+carregarColaboradores();
 
-    }
+carregarHistorico();
 
-
-    colaboradores =
-        colaboradores.map(item => {
-
-            if (Number(item.id) === id) {
-
-                return {
-                    ...item,
-                    lms: lms,
-                    nome: nome
-                };
-
-            }
-
-            return item;
-
-        });
-
-
-    registros =
-        registros.map(item => {
-
-            if (
-                item.lms.toLowerCase() ===
-                lmsAntigo.toLowerCase()
-            ) {
-
-                return {
-                    ...item,
-                    lms: lms,
-                    nome: nome
-                };
-
-            }
-
-            return item;
-
-        });
-
-
-    fecharModalColaborador();
-
-    carregarColaboradores();
-
-    carregarHistorico();
-
-    atualizarDashboard();
+atualizarDashboard();
 
 }
 
-
 /* =========================================================
-   FECHAR MODAL DE COLABORADOR
+FECHAR MODAL DE COLABORADOR
 ========================================================= */
 
 function fecharModalColaborador() {
 
-    document
-        .getElementById(
-            "modalColaborador"
-        )
-        .classList.remove("aberto");
+document
+    .getElementById(
+        "modalColaborador"
+    )
+    .classList.remove("aberto");
 
 }
 
-
 /* =========================================================
-   EXCLUIR COLABORADOR
+EXCLUIR COLABORADOR
 ========================================================= */
 
 async function excluirColaborador(id) {
 
-    const colaborador =
-        colaboradores.find(
-            item => Number(item.id) === Number(id)
-        );
-
-
-    if (!colaborador) return;
-
-
-    const confirmar = confirm(
-
-        `Deseja excluir o colaborador ${colaborador.nome}?`
-
+const colaborador =
+    colaboradores.find(
+        item => Number(item.id) === Number(id)
     );
 
+if (!colaborador) return;
 
-    if (!confirmar) return;
+const confirmar = confirm(
 
+    `Deseja excluir o colaborador ${colaborador.nome}?`
 
-    const { error } = await db
-        .from("colaboradores")
-        .delete()
-        .eq("id", id);
+);
 
+if (!confirmar) return;
 
-    if (error) {
+const { error } = await db
+    .from("colaboradores")
+    .delete()
+    .eq("id", id);
 
-        console.error(
-            "Erro ao excluir colaborador:",
-            error
-        );
+if (error) {
 
-        alert(
-            "Erro ao excluir o colaborador."
-        );
+    console.error(
+        "Erro ao excluir colaborador:",
+        error
+    );
 
-        return;
-    }
+    alert(
+        "Erro ao excluir o colaborador."
+    );
 
+    return;
+}
 
-    colaboradores =
-        colaboradores.filter(
-            item => Number(item.id) !== Number(id)
-        );
+colaboradores =
+    colaboradores.filter(
+        item => Number(item.id) !== Number(id)
+    );
 
-
-    carregarColaboradores();
+carregarColaboradores();
 
 }
 
-
 /* =========================================================
-   FORMATAÇÃO
+FORMATAÇÃO
 ========================================================= */
 
 function formatarStatus(status) {
 
-    const nomes = {
+const nomes = {
 
-        retirado: "Retirado",
+    retirado: "Retirado",
 
-        devolvido: "Devolvido",
+    devolvido: "Devolvido",
 
-        extraviado: "Extraviado"
+    extraviado: "Extraviado"
 
-    };
+};
 
-
-    return nomes[status] || status;
+return nomes[status] || status;
 
 }
-
 
 function formatarData(data) {
 
-    if (!data) return "-";
+if (!data) return "-";
 
+return new Date(data)
+    .toLocaleString(
+        "pt-BR",
+        {
 
-    return new Date(data)
-        .toLocaleString(
-            "pt-BR",
-            {
+            day: "2-digit",
 
-                day: "2-digit",
+            month: "2-digit",
 
-                month: "2-digit",
+            year: "numeric",
 
-                year: "numeric",
+            hour: "2-digit",
 
-                hour: "2-digit",
+            minute: "2-digit"
 
-                minute: "2-digit"
-
-            }
-        );
+        }
+    );
 
 }
 
-
 /* =========================================================
-   SEGURANÇA BÁSICA
+SEGURANÇA BÁSICA
 ========================================================= */
 
 function escaparHTML(texto) {
 
-    if (
-        texto === undefined ||
-        texto === null
-    ) {
+if (
+    texto === undefined ||
+    texto === null
+) {
 
-        return "";
-
-    }
-
-
-    return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return "";
 
 }
 
+return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
 
 /* =========================================================
-   INICIALIZAÇÃO
+INICIALIZAÇÃO
 ========================================================= */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+"DOMContentLoaded",
+async () => {
 
-        await carregarDados();
+    await carregarDados();
 
-    }
+}
+
 );
