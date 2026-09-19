@@ -377,7 +377,7 @@ const colaborador = colaboradores.find(
     item =>
         item.lms.toLowerCase() === lms
 );
-
+    
 if (colaborador) {
 
     campoNome.value =
@@ -389,6 +389,11 @@ if (colaborador) {
     status.classList.add(
         "sucesso"
     );
+
+    // Vai automaticamente para o código do equipamento
+    document.getElementById("codigo").focus();
+
+}
 
 } else {
 
