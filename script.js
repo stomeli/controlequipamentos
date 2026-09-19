@@ -513,6 +513,11 @@ if (error) {
 
 registros.push(data);
 
+
+/* =====================================================
+   LIMPAR FORMULÁRIO
+===================================================== */
+
 document.getElementById("lms").value = "";
 
 document.getElementById("nome").value = "";
@@ -526,9 +531,38 @@ document.getElementById("statusLms").textContent = "";
 document.getElementById("statusLms").className =
     "status-lms";
 
+
+/* =====================================================
+   MENSAGEM DE SUCESSO
+===================================================== */
+
+const mensagem =
+    document.getElementById("mensagemRetirada");
+
+mensagem.innerHTML = `
+    <div class="mensagem-sucesso">
+        ✓ Retirada registrada com sucesso!
+        <br>
+        Equipamento:
+        <strong>${escaparHTML(data.codigo)}</strong>
+    </div>
+`;
+
+
+/* =====================================================
+   ATUALIZAR DADOS
+===================================================== */
+
 atualizarDashboard();
 
 carregarHistorico();
+
+
+/* =====================================================
+   FOCO NOVAMENTE NO LMS
+===================================================== */
+
+document.getElementById("lms").focus();
 
 }
 
