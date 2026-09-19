@@ -1772,9 +1772,6 @@ return String(texto)
 
 }
 
-function escaparHTML(texto) {
-    ...
-}
 
 /* =========================================================
    ENTER - LEITOR 2D
