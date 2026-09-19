@@ -1819,6 +1819,86 @@ document.addEventListener(
 );
 
 
+/* =========================================================
+   ENTER - LEITOR 2D
+   FLUXO:
+
+   LMS + ENTER
+   → ignora ENTER
+   → vai para código
+
+   CÓDIGO + ENTER
+   → registra retirada
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        const paginaRetirada =
+            document.getElementById("retirada");
+
+        if (
+            !paginaRetirada ||
+            !paginaRetirada.classList.contains("active")
+        ) {
+            return;
+        }
+
+        const elemento =
+            document.activeElement;
+
+
+        /* =====================================================
+           ENTER NO LMS
+           ===================================================== */
+
+        if (
+            elemento &&
+            elemento.id === "lms" &&
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            const campoCodigo =
+                document.getElementById("codigo");
+
+            const campoNome =
+                document.getElementById("nome");
+
+            // Só avança se o LMS foi reconhecido
+            if (
+                campoNome.value.trim() !== ""
+            ) {
+
+                campoCodigo.focus();
+
+            }
+
+            return;
+        }
+
+
+        /* =====================================================
+           ENTER NO CÓDIGO
+           ===================================================== */
+
+        if (
+            elemento &&
+            elemento.id === "codigo" &&
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            registrarRetirada();
+
+            return;
+        }
+
+    }
+);
 
 
 /* =========================================================
