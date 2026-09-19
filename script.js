@@ -2070,6 +2070,36 @@ function inicializarFiltroDataHistorico() {
 
 
 /* =========================================================
+   ATUALIZAR TEXTO DO BOTÃO DO FILTRO DE DATA
+========================================================= */
+
+function atualizarTextoBotaoFiltroData() {
+    const botao = document.getElementById("botaoFiltroDataHistorico");
+
+    if (!botao) {
+        console.warn("botaoFiltroDataHistorico não encontrado.");
+        return;
+    }
+
+    const dataInicial = document.getElementById("dataInicialHistorico");
+    const dataFinal = document.getElementById("dataFinalHistorico");
+
+    const valorInicial = dataInicial ? dataInicial.value : "";
+    const valorFinal = dataFinal ? dataFinal.value : "";
+
+    if (valorInicial && valorFinal) {
+        botao.textContent = `${valorInicial} - ${valorFinal}`;
+    } else if (valorInicial) {
+        botao.textContent = valorInicial;
+    } else if (valorFinal) {
+        botao.textContent = valorFinal;
+    } else {
+        botao.textContent = "Filtrar por data";
+    }
+}
+
+
+/* =========================================================
    ABRIR / FECHAR CALENDÁRIO
 ========================================================= */
 
