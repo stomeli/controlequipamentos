@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -6,13 +5,23 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Controle de Equipamentos</title>
 
-    <link rel="icon" type="image/png" href="icone.png">
+    <link
+        rel="icon"
+        type="image/png"
+        href="icone.png"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
 </head>
 
@@ -92,13 +101,18 @@
      DASHBOARD
 ========================= -->
 
-<section id="dashboard" class="pagina active">
+<section
+    id="dashboard"
+    class="pagina active"
+>
 
     <div class="pagina-header">
 
         <div>
 
-            <h2>Dashboard</h2>
+            <h2>
+                Dashboard
+            </h2>
 
             <p>
                 Visão geral dos equipamentos.
@@ -166,7 +180,9 @@
                 placeholder="Digite LMS, nome ou código do equipamento"
             >
 
-            <button onclick="buscarDashboard()">
+            <button
+                onclick="buscarDashboard()"
+            >
                 Buscar
             </button>
 
@@ -183,7 +199,10 @@
      COLABORADORES
 ========================= -->
 
-<section id="colaboradores" class="pagina">
+<section
+    id="colaboradores"
+    class="pagina"
+>
 
     <div class="pagina-header">
 
@@ -271,7 +290,9 @@
                 placeholder="Buscar por LMS ou nome"
             >
 
-            <button onclick="carregarColaboradores()">
+            <button
+                onclick="carregarColaboradores()"
+            >
                 Buscar
             </button>
 
@@ -318,7 +339,10 @@
      REGISTRO DE RETIRADA
 ========================= -->
 
-<section id="retirada" class="pagina">
+<section
+    id="retirada"
+    class="pagina"
+>
 
     <div class="pagina-header">
 
@@ -344,25 +368,25 @@
 
             <div class="campo">
 
-    <label for="lms">
-        LMS do colaborador
-    </label>
+                <label for="lms">
+                    LMS do colaborador
+                </label>
 
-    <input
-        type="text"
-        id="lms"
-        placeholder="Digite o LMS"
-        oninput="buscarNomePorLms()"
-        onkeydown="if (event.key === 'Enter') { event.preventDefault(); buscarNomePorLms(); }"
-        autocomplete="off"
-    >
+                <input
+                    type="text"
+                    id="lms"
+                    placeholder="Digite o LMS"
+                    oninput="buscarNomePorLms()"
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); buscarNomePorLms(); }"
+                    autocomplete="off"
+                >
 
-    <small
-        id="statusLms"
-        class="status-lms"
-    ></small>
+                <small
+                    id="statusLms"
+                    class="status-lms"
+                ></small>
 
-</div>
+            </div>
 
 
             <div class="campo">
@@ -446,7 +470,10 @@
      HISTÓRICO
 ========================= -->
 
-<section id="historico" class="pagina">
+<section
+    id="historico"
+    class="pagina"
+>
 
     <div class="pagina-header">
 
@@ -467,6 +494,13 @@
 
     <div class="painel">
 
+        <h3>
+            Filtros de busca
+        </h3>
+
+
+        <!-- BUSCA POR TEXTO -->
+
         <div class="busca">
 
             <input
@@ -475,16 +509,204 @@
                 placeholder="Buscar por LMS, nome ou código"
             >
 
-            <button onclick="carregarHistorico()">
+        </div>
+
+
+        <!-- FILTROS -->
+
+        <div
+            class="form-grid"
+            style="margin-top: 15px;"
+        >
+
+            <div class="campo">
+
+                <label for="filtroStatusHistorico">
+                    Status
+                </label>
+
+                <select id="filtroStatusHistorico">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option value="retirado">
+                        Retirado
+                    </option>
+
+                    <option value="devolvido">
+                        Devolvido
+                    </option>
+
+                    <option value="extraviado">
+                        Extraviado
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="filtroMesHistorico">
+                    Mês
+                </label>
+
+                <select id="filtroMesHistorico">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    <option value="1">
+                        Janeiro
+                    </option>
+
+                    <option value="2">
+                        Fevereiro
+                    </option>
+
+                    <option value="3">
+                        Março
+                    </option>
+
+                    <option value="4">
+                        Abril
+                    </option>
+
+                    <option value="5">
+                        Maio
+                    </option>
+
+                    <option value="6">
+                        Junho
+                    </option>
+
+                    <option value="7">
+                        Julho
+                    </option>
+
+                    <option value="8">
+                        Agosto
+                    </option>
+
+                    <option value="9">
+                        Setembro
+                    </option>
+
+                    <option value="10">
+                        Outubro
+                    </option>
+
+                    <option value="11">
+                        Novembro
+                    </option>
+
+                    <option value="12">
+                        Dezembro
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="filtroAnoHistorico">
+                    Ano
+                </label>
+
+                <select id="filtroAnoHistorico">
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- BOTÕES -->
+
+        <div
+            class="acoes"
+            style="margin-top: 15px;"
+        >
+
+            <button
+                class="btn-principal"
+                onclick="carregarHistorico(true)"
+            >
                 Buscar
             </button>
 
 
             <button
                 class="btn-secundario"
-                onclick="mostrarTodos()"
+                onclick="limparFiltrosHistorico()"
             >
-                Mostrar todos
+                Limpar filtros
+            </button>
+
+        </div>
+
+
+        <!-- CONTROLE DE SELEÇÃO -->
+
+        <div
+            id="acoesSelecaoHistorico"
+            style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 15px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 8px;
+                background: #f5f5f5;
+            "
+        >
+
+            <label
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                "
+            >
+
+                <input
+                    type="checkbox"
+                    id="selecionarTodosHistorico"
+                    onchange="selecionarTodosHistorico(this.checked)"
+                >
+
+                Selecionar todos desta página
+
+            </label>
+
+
+            <span id="contadorSelecionadosHistorico">
+                0 selecionados
+            </span>
+
+
+            <button
+                class="btn-excluir"
+                id="btnExcluirSelecionados"
+                onclick="excluirSelecionados()"
+                disabled
+            >
+                Excluir selecionados
             </button>
 
         </div>
@@ -498,28 +720,50 @@
 
                     <tr>
 
-                        <th>LMS</th>
+                        <th style="width: 50px;">
+                            Selecionar
+                        </th>
 
-                        <th>Colaborador</th>
+                        <th>
+                            LMS
+                        </th>
 
-                        <th>Equipamento</th>
+                        <th>
+                            Colaborador
+                        </th>
 
-                        <th>Retirada</th>
+                        <th>
+                            Equipamento
+                        </th>
 
-                        <th>Devolução</th>
+                        <th>
+                            Retirada
+                        </th>
 
-                        <th>Status</th>
+                        <th>
+                            Devolução
+                        </th>
 
-                        <th>Observação</th>
+                        <th>
+                            Status
+                        </th>
 
-                        <th>Ações</th>
+                        <th>
+                            Observação
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
 
                     </tr>
 
                 </thead>
 
 
-                <tbody id="tabelaHistorico"></tbody>
+                <tbody
+                    id="tabelaHistorico"
+                ></tbody>
 
             </table>
 
@@ -549,7 +793,9 @@
                 Editar colaborador
             </h3>
 
-            <button onclick="fecharModalColaborador()">
+            <button
+                onclick="fecharModalColaborador()"
+            >
                 ×
             </button>
 
@@ -631,7 +877,9 @@
                 Editar registro
             </h3>
 
-            <button onclick="fecharModal()">
+            <button
+                onclick="fecharModal()"
+            >
                 ×
             </button>
 
@@ -761,4 +1009,3 @@
 </body>
 
 </html>
-
