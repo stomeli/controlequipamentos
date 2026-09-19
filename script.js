@@ -348,65 +348,65 @@ BUSCAR NOME POR LMS
 
 function buscarNomePorLms() {
 
-const campoLms = document
-    .getElementById("lms");
+    const campoLms =
+        document.getElementById("lms");
 
-const campoNome = document
-    .getElementById("nome");
+    const campoNome =
+        document.getElementById("nome");
 
-const status = document
-    .getElementById("statusLms");
+    const campoCodigo =
+        document.getElementById("codigo");
 
-const lms = campoLms
-    .value
-    .trim()
-    .toLowerCase();
+    const status =
+        document.getElementById("statusLms");
 
-campoNome.value = "";
+    const lms =
+        campoLms.value.trim().toLowerCase();
 
-status.textContent = "";
+    campoNome.value = "";
 
-status.className = "status-lms";
+    status.textContent = "";
 
-if (!lms) {
+    status.className = "status-lms";
 
-    return;
-}
+    if (!lms) {
+        return;
+    }
 
-const colaborador = colaboradores.find(
-    item =>
-        item.lms.toLowerCase() === lms
-);
-    
-if (colaborador) {
-
-    campoNome.value =
-        colaborador.nome;
-
-    status.textContent =
-        "Colaborador encontrado";
-
-    status.classList.add(
-        "sucesso"
+    const colaborador = colaboradores.find(
+        item =>
+            item.lms.toLowerCase() === lms
     );
 
-    // Vai automaticamente para o código do equipamento
-    document.getElementById("codigo").focus();
+    if (colaborador) {
+
+        campoNome.value =
+            colaborador.nome;
+
+        status.textContent =
+            "Colaborador encontrado";
+
+        status.classList.add(
+            "sucesso"
+        );
+
+        // Quando encontrar o LMS,
+        // prepara o próximo campo.
+        campoCodigo.focus();
+
+    } else {
+
+        status.textContent =
+            "LMS não cadastrado";
+
+        status.classList.add(
+            "erro"
+        );
+
+    }
 
 }
 
-} else {
-
-    status.textContent =
-        "LMS não cadastrado";
-
-    status.classList.add(
-        "erro"
-    );
-
-}
-
-}
 
 /* =========================================================
 REGISTRAR RETIRADA
