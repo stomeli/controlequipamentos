@@ -2,13 +2,14 @@
 SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "https://dfqclkfqdzfsftnmzejx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_IV8xYF0qDVVYAxhSgSjqtg_mreIReGf";
+const SUPABASE_URL = "URL_DO_NOVO_PROJETO";
+const SUPABASE_ANON_KEY = "CHAVE_PUBLICA_DO_NOVO_PROJETO";
 
 const db = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_ANON_KEY
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
 );
+
 
 /* =========================================================
 DADOS
