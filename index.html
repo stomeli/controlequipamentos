@@ -1,5 +1,7 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
     <meta charset="UTF-8">
@@ -10,21 +12,35 @@
 
     <link rel="icon" type="image/png" href="icone.png">
 
-</head>
-
-    
     <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
 <header class="topbar">
 
-    <div class="logo">
-    <img src="mercado-livre.png" alt="Mercado Livre">
-</div>
-            <h1>Controle de Equipamentos</h1>
-            <span>Gestão de retiradas e devoluções</span>
+    <div class="logo-area">
+
+        <div class="logo">
+
+            <img
+                src="mercado-livre.png"
+                alt="Mercado Livre"
+            >
+
+        </div>
+
+        <div>
+
+            <h1>
+                Controle de Equipamentos
+            </h1>
+
+            <span>
+                Gestão de retiradas e devoluções
+            </span>
+
         </div>
 
     </div>
@@ -45,7 +61,6 @@
         Dashboard
     </button>
 
-
     <button
         class="menu-btn"
         onclick="mostrarPagina('colaboradores', this)"
@@ -53,14 +68,12 @@
         Colaboradores
     </button>
 
-
     <button
         class="menu-btn"
         onclick="mostrarPagina('retirada', this)"
     >
         Registro de retirada
     </button>
-
 
     <button
         class="menu-btn"
@@ -145,7 +158,6 @@
             Buscar equipamento ou colaborador
         </h3>
 
-
         <div class="busca">
 
             <input
@@ -154,20 +166,17 @@
                 placeholder="Digite LMS, nome ou código do equipamento"
             >
 
-
             <button onclick="buscarDashboard()">
                 Buscar
             </button>
 
         </div>
 
-
         <div id="resultadoDashboard"></div>
 
     </div>
 
 </section>
-
 
 
 <!-- =========================
@@ -198,7 +207,6 @@
         <h3>
             Novo colaborador
         </h3>
-
 
         <div class="form-grid">
 
@@ -263,11 +271,9 @@
                 placeholder="Buscar por LMS ou nome"
             >
 
-
             <button onclick="carregarColaboradores()">
                 Buscar
             </button>
-
 
             <button
                 class="btn-secundario"
@@ -287,22 +293,15 @@
 
                     <tr>
 
-                        <th>
-                            LMS
-                        </th>
+                        <th>LMS</th>
 
-                        <th>
-                            Nome
-                        </th>
+                        <th>Nome</th>
 
-                        <th>
-                            Ações
-                        </th>
+                        <th>Ações</th>
 
                     </tr>
 
                 </thead>
-
 
                 <tbody id="tabelaColaboradores"></tbody>
 
@@ -313,7 +312,6 @@
     </div>
 
 </section>
-
 
 
 <!-- =========================
@@ -344,8 +342,6 @@
         <div class="form-grid">
 
 
-            <!-- LMS -->
-
             <div class="campo">
 
                 <label for="lms">
@@ -368,8 +364,6 @@
             </div>
 
 
-            <!-- NOME AUTOMÁTICO -->
-
             <div class="campo">
 
                 <label for="nome">
@@ -386,8 +380,6 @@
             </div>
 
 
-            <!-- EQUIPAMENTO -->
-
             <div class="campo">
 
                 <label for="codigo">
@@ -402,8 +394,6 @@
 
             </div>
 
-
-            <!-- OBSERVAÇÃO -->
 
             <div class="campo">
 
@@ -444,13 +434,11 @@
 
         <div id="mensagemRetirada"></div>
 
-<div id="resultadoRetirada"></div>
-
+        <div id="resultadoRetirada"></div>
 
     </div>
 
 </section>
-
 
 
 <!-- =========================
@@ -478,7 +466,6 @@
 
     <div class="painel">
 
-
         <div class="busca">
 
             <input
@@ -486,7 +473,6 @@
                 id="buscaHistorico"
                 placeholder="Buscar por LMS, nome ou código"
             >
-
 
             <button onclick="carregarHistorico()">
                 Buscar
@@ -545,12 +531,14 @@
 </main>
 
 
-
 <!-- =========================
      MODAL - EDITAR COLABORADOR
 ========================= -->
 
-<div id="modalColaborador" class="modal">
+<div
+    id="modalColaborador"
+    class="modal"
+>
 
     <div class="modal-content">
 
@@ -559,7 +547,6 @@
             <h3>
                 Editar colaborador
             </h3>
-
 
             <button onclick="fecharModalColaborador()">
                 ×
@@ -626,12 +613,14 @@
 </div>
 
 
-
 <!-- =========================
      MODAL - EDITAR REGISTRO
 ========================= -->
 
-<div id="modalEdicao" class="modal">
+<div
+    id="modalEdicao"
+    class="modal"
+>
 
     <div class="modal-content">
 
@@ -640,7 +629,6 @@
             <h3>
                 Editar registro
             </h3>
-
 
             <button onclick="fecharModal()">
                 ×
@@ -761,8 +749,15 @@
 </div>
 
 
+<!-- =========================
+     SCRIPTS
+========================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="script.js"></script>
 
 </body>
+
 </html>
+
