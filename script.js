@@ -583,19 +583,13 @@ function mostrarTodosColaboradores() {
 function buscarNomePorLms() {
 
     const campoLms =
-        document.getElementById(
-            "lms"
-        );
+        document.getElementById("lms");
 
     const campoNome =
-        document.getElementById(
-            "nome"
-        );
+        document.getElementById("nome");
 
     const status =
-        document.getElementById(
-            "statusLms"
-        );
+        document.getElementById("statusLms");
 
 
     if (
@@ -603,18 +597,22 @@ function buscarNomePorLms() {
         !campoNome ||
         !status
     ) {
-
         return;
-
     }
 
 
+    // Remove espaços e caracteres enviados pelo leitor 2D
+    const lmsDigitado =
+        String(campoLms.value || "")
+            .replace(/[\r\n\t]/g, "")
+            .trim();
+
+
     const lms =
-        normalizarTexto(
-            campoLms.value
-        );
+        normalizarTexto(lmsDigitado);
 
 
+    // Limpa o nome e o status antes da nova busca
     campoNome.value = "";
 
     status.textContent = "";
@@ -624,26 +622,31 @@ function buscarNomePorLms() {
 
 
     if (!lms) {
-
         return;
-
     }
 
 
     const colaborador =
         colaboradores.find(
-            item =>
-                normalizarTexto(
-                    item.lms
-                ) ===
-                lms
+            item => {
+
+                const lmsCadastrado =
+                    normalizarTexto(
+                        String(item.lms || "")
+                            .replace(/[\r\n\t]/g, "")
+                            .trim()
+                    );
+
+                return lmsCadastrado === lms;
+
+            }
         );
 
 
     if (colaborador) {
 
         campoNome.value =
-            colaborador.nome;
+            colaborador.nome || "";
 
         status.textContent =
             "Colaborador encontrado";
