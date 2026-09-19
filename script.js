@@ -354,9 +354,6 @@ function buscarNomePorLms() {
     const campoNome =
         document.getElementById("nome");
 
-    const campoCodigo =
-        document.getElementById("codigo");
-
     const status =
         document.getElementById("statusLms");
 
@@ -1775,6 +1772,10 @@ return String(texto)
 
 }
 
+function escaparHTML(texto) {
+    ...
+}
+
 /* =========================================================
    ENTER - LEITOR 2D
 ========================================================= */
@@ -1799,7 +1800,7 @@ document.addEventListener(
 
         /* =====================================================
            ENTER NO LMS
-           → NÃO REGISTRA
+           → IGNORA
            → VAI PARA O CÓDIGO
         ===================================================== */
 
@@ -1817,10 +1818,6 @@ document.addEventListener(
             const campoCodigo =
                 document.getElementById("codigo");
 
-            /*
-               Só avança se o LMS foi encontrado.
-            */
-
             if (
                 campoNome.value.trim() !== ""
             ) {
@@ -1835,7 +1832,7 @@ document.addEventListener(
 
         /* =====================================================
            ENTER NO CÓDIGO
-           → REGISTRA A RETIRADA
+           → REGISTRA
         ===================================================== */
 
         if (
