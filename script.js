@@ -29,6 +29,14 @@ let paginaHistoricoAtual = 1;
 
 
 /* =========================================================
+   SELEÇÃO DO HISTÓRICO
+========================================================= */
+
+let registrosSelecionados =
+    new Set();
+
+
+/* =========================================================
    INICIALIZAR SUPABASE
 ========================================================= */
 
@@ -44,18 +52,23 @@ function inicializarSupabase() {
         );
 
         return false;
+
     }
+
 
     db = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_ANON_KEY
     );
 
+
     console.log(
         "Supabase conectado com sucesso."
     );
 
+
     return true;
+
 }
 
 
@@ -75,16 +88,13 @@ async function carregarDados() {
 
     }
 
+
     try {
 
         console.log(
             "Iniciando carregamento dos dados..."
         );
 
-
-        /* =================================================
-           REGISTROS
-        ================================================= */
 
         const {
             data: dadosRegistros,
@@ -113,10 +123,6 @@ async function carregarDados() {
         }
 
 
-        /* =================================================
-           COLABORADORES
-        ================================================= */
-
         const {
             data: dadosColaboradores,
             error: erroColaboradores
@@ -144,12 +150,9 @@ async function carregarDados() {
         }
 
 
-        /* =================================================
-           SALVAR DADOS
-        ================================================= */
-
         registros =
             dadosRegistros || [];
+
 
         colaboradores =
             dadosColaboradores || [];
@@ -160,11 +163,14 @@ async function carregarDados() {
             registros.length
         );
 
+
         console.log(
             "Colaboradores carregados:",
             colaboradores.length
         );
 
+
+        preencherAnosHistorico();
 
         atualizarDashboard();
 
@@ -267,6 +273,8 @@ function mostrarPagina(
 
         paginaHistoricoAtual = 1;
 
+        preencherAnosHistorico();
+
         carregarHistorico();
 
     }
@@ -284,6 +292,7 @@ async function cadastrarColaborador() {
         document.getElementById(
             "cadastroLms"
         );
+
 
     const campoNome =
         document.getElementById(
@@ -303,6 +312,7 @@ async function cadastrarColaborador() {
 
     const lms =
         campoLms.value.trim();
+
 
     const nome =
         campoNome.value.trim();
@@ -401,6 +411,7 @@ async function carregarColaboradores() {
         document.getElementById(
             "buscaColaborador"
         );
+
 
     const tabela =
         document.getElementById(
@@ -583,13 +594,21 @@ function mostrarTodosColaboradores() {
 function buscarNomePorLms() {
 
     const campoLms =
-        document.getElementById("lms");
+        document.getElementById(
+            "lms"
+        );
+
 
     const campoNome =
-        document.getElementById("nome");
+        document.getElementById(
+            "nome"
+        );
+
 
     const status =
-        document.getElementById("statusLms");
+        document.getElementById(
+            "statusLms"
+        );
 
 
     if (
@@ -597,22 +616,29 @@ function buscarNomePorLms() {
         !campoNome ||
         !status
     ) {
+
         return;
+
     }
 
 
-    // Remove espaços e caracteres enviados pelo leitor 2D
     const lmsDigitado =
-        String(campoLms.value || "")
-            .replace(/[\r\n\t]/g, "")
+        String(
+            campoLms.value || ""
+        )
+            .replace(
+                /[\r\n\t]/g,
+                ""
+            )
             .trim();
 
 
     const lms =
-        normalizarTexto(lmsDigitado);
+        normalizarTexto(
+            lmsDigitado
+        );
 
 
-    // Limpa o nome e o status antes da nova busca
     campoNome.value = "";
 
     status.textContent = "";
@@ -622,7 +648,9 @@ function buscarNomePorLms() {
 
 
     if (!lms) {
+
         return;
+
     }
 
 
@@ -632,12 +660,21 @@ function buscarNomePorLms() {
 
                 const lmsCadastrado =
                     normalizarTexto(
-                        String(item.lms || "")
-                            .replace(/[\r\n\t]/g, "")
+                        String(
+                            item.lms || ""
+                        )
+                            .replace(
+                                /[\r\n\t]/g,
+                                ""
+                            )
                             .trim()
                     );
 
-                return lmsCadastrado === lms;
+
+                return (
+                    lmsCadastrado ===
+                    lms
+                );
 
             }
         );
@@ -648,8 +685,10 @@ function buscarNomePorLms() {
         campoNome.value =
             colaborador.nome || "";
 
+
         status.textContent =
             "Colaborador encontrado";
+
 
         status.classList.add(
             "sucesso"
@@ -660,6 +699,7 @@ function buscarNomePorLms() {
 
         status.textContent =
             "LMS não cadastrado";
+
 
         status.classList.add(
             "erro"
@@ -681,15 +721,18 @@ async function registrarRetirada() {
             "lms"
         );
 
+
     const campoNome =
         document.getElementById(
             "nome"
         );
 
+
     const campoCodigo =
         document.getElementById(
             "codigo"
         );
+
 
     const campoObservacao =
         document.getElementById(
@@ -712,11 +755,14 @@ async function registrarRetirada() {
     const lms =
         campoLms.value.trim();
 
+
     const nome =
         campoNome.value.trim();
 
+
     const codigo =
         campoCodigo.value.trim();
+
 
     const observacao =
         campoObservacao.value.trim();
@@ -774,10 +820,6 @@ async function registrarRetirada() {
         colaborador.nome;
 
 
-    /* =================================================
-       VERIFICAR EQUIPAMENTO JÁ RETIRADO
-    ================================================= */
-
     const {
         data: equipamentoExistente,
         error: erroBusca
@@ -826,10 +868,6 @@ async function registrarRetirada() {
 
     }
 
-
-    /* =================================================
-       SALVAR NO SUPABASE
-    ================================================= */
 
     const {
         data,
@@ -901,10 +939,6 @@ async function registrarRetirada() {
     );
 
 
-    /* =================================================
-       ATUALIZAR ARRAY LOCAL
-    ================================================= */
-
     const indiceExistente =
         registros.findIndex(
             item =>
@@ -932,6 +966,8 @@ async function registrarRetirada() {
     }
 
 
+    preencherAnosHistorico();
+
     atualizarDashboard();
 
 
@@ -939,10 +975,6 @@ async function registrarRetirada() {
 
     await carregarHistorico();
 
-
-    /* =================================================
-       LIMPAR FORMULÁRIO
-    ================================================= */
 
     campoLms.value = "";
 
@@ -968,10 +1000,6 @@ async function registrarRetirada() {
 
     }
 
-
-    /* =================================================
-       MENSAGEM DE SUCESSO
-    ================================================= */
 
     const mensagem =
         document.getElementById(
@@ -1054,10 +1082,12 @@ function atualizarDashboard() {
             "totalRetirados"
         );
 
+
     const totalDevolvidos =
         document.getElementById(
             "totalDevolvidos"
         );
+
 
     const totalExtraviados =
         document.getElementById(
@@ -1101,6 +1131,7 @@ function buscarDashboard() {
         document.getElementById(
             "buscaDashboard"
         );
+
 
     const resultado =
         document.getElementById(
@@ -1273,15 +1304,18 @@ function buscarRetirada() {
             "lms"
         );
 
+
     const campoCodigo =
         document.getElementById(
             "codigo"
         );
 
+
     const campoNome =
         document.getElementById(
             "nome"
         );
+
 
     const resultado =
         document.getElementById(
@@ -1306,10 +1340,12 @@ function buscarRetirada() {
             campoLms.value
         );
 
+
     const codigo =
         normalizarTexto(
             campoCodigo.value
         );
+
 
     const nome =
         normalizarTexto(
@@ -1479,20 +1515,16 @@ function buscarRetirada() {
 /* =========================================================
    HISTÓRICO
 ========================================================= */
-function normalizarTexto(texto) {
-    return String(texto ?? "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-} 
 
-async function carregarHistorico() {
+async function carregarHistorico(
+    resetarPagina = false
+) {
 
     const campo =
         document.getElementById(
             "buscaHistorico"
         );
+
 
     const tabela =
         document.getElementById(
@@ -1510,10 +1542,53 @@ async function carregarHistorico() {
     }
 
 
+    if (resetarPagina) {
+
+        paginaHistoricoAtual = 1;
+
+    }
+
+
     const termo =
         normalizarTexto(
             campo.value
         );
+
+
+    const filtroStatus =
+        document.getElementById(
+            "filtroStatusHistorico"
+        );
+
+
+    const filtroMes =
+        document.getElementById(
+            "filtroMesHistorico"
+        );
+
+
+    const filtroAno =
+        document.getElementById(
+            "filtroAnoHistorico"
+        );
+
+
+    const statusSelecionado =
+        filtroStatus
+            ? filtroStatus.value
+            : "";
+
+
+    const mesSelecionado =
+        filtroMes
+            ? filtroMes.value
+            : "";
+
+
+    const anoSelecionado =
+        filtroAno
+            ? filtroAno.value
+            : "";
 
 
     const {
@@ -1543,40 +1618,141 @@ async function carregarHistorico() {
         data || [];
 
 
+    preencherAnosHistorico();
+
+
     let lista =
-        registros;
+        registros.filter(
+            item => {
+
+                /* =========================
+                   BUSCA TEXTO
+                ========================= */
+
+                if (termo) {
+
+                    const encontrouTexto =
+
+                        normalizarTexto(
+                            item.lms
+                        ).includes(
+                            termo
+                        )
+
+                        ||
+
+                        normalizarTexto(
+                            item.nome
+                        ).includes(
+                            termo
+                        )
+
+                        ||
+
+                        normalizarTexto(
+                            item.codigo
+                        ).includes(
+                            termo
+                        );
 
 
-    if (termo) {
+                    if (!encontrouTexto) {
 
-        lista =
-            registros.filter(
-                item =>
+                        return false;
 
-                    normalizarTexto(
-                        item.lms
-                    ).includes(
-                        termo
-                    )
+                    }
 
-                    ||
+                }
 
-                    normalizarTexto(
-                        item.nome
-                    ).includes(
-                        termo
-                    )
 
-                    ||
+                /* =========================
+                   FILTRO STATUS
+                ========================= */
 
-                    normalizarTexto(
-                        item.codigo
-                    ).includes(
-                        termo
-                    )
-            );
+                if (
+                    statusSelecionado &&
+                    item.status !==
+                        statusSelecionado
+                ) {
 
-    }
+                    return false;
+
+                }
+
+
+                /* =========================
+                   FILTRO DATA
+                ========================= */
+
+                if (
+                    mesSelecionado ||
+                    anoSelecionado
+                ) {
+
+                    if (!item.retirada) {
+
+                        return false;
+
+                    }
+
+
+                    const dataRetirada =
+                        new Date(
+                            item.retirada
+                        );
+
+
+                    if (
+                        Number.isNaN(
+                            dataRetirada.getTime()
+                        )
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const mes =
+                        String(
+                            dataRetirada.getMonth() + 1
+                        );
+
+
+                    const ano =
+                        String(
+                            dataRetirada.getFullYear()
+                        );
+
+
+                    if (
+                        mesSelecionado &&
+                        mes !==
+                            mesSelecionado
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        anoSelecionado &&
+                        ano !==
+                            anoSelecionado
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+
+                return true;
+
+            }
+        );
 
 
     if (!lista.length) {
@@ -1585,7 +1761,7 @@ async function carregarHistorico() {
 
             <tr>
 
-                <td colspan="8">
+                <td colspan="9">
                     Nenhum registro encontrado.
                 </td>
 
@@ -1597,6 +1773,12 @@ async function carregarHistorico() {
         atualizarPaginacaoHistorico(
             0
         );
+
+
+        atualizarControleSelecaoHistorico(
+            []
+        );
+
 
         atualizarDashboard();
 
@@ -1662,97 +1844,134 @@ async function carregarHistorico() {
     tabela.innerHTML =
         listaPagina
             .map(
-                item => `
+                item => {
 
-                <tr>
+                    const id =
+                        Number(
+                            item.id
+                        );
 
-                    <td>
-                        ${escaparHTML(
-                            item.lms
-                        )}
-                    </td>
 
-                    <td>
-                        ${escaparHTML(
-                            item.nome
-                        )}
-                    </td>
+                    const selecionado =
+                        registrosSelecionados.has(
+                            id
+                        );
 
-                    <td>
-                        ${escaparHTML(
-                            item.codigo
-                        )}
-                    </td>
 
-                    <td>
-                        ${formatarData(
-                            item.retirada
-                        )}
-                    </td>
+                    return `
 
-                    <td>
-                        ${
-                            item.devolucao
-                                ? formatarData(
+                        <tr>
+
+                            <td>
+
+                                <input
+                                    type="checkbox"
+                                    class="check-registro-historico"
+                                    value="${id}"
+                                    ${
+                                        selecionado
+                                            ? "checked"
+                                            : ""
+                                    }
+                                    onchange="alternarSelecaoRegistro(${id}, this.checked)"
+                                >
+
+                            </td>
+
+
+                            <td>
+                                ${escaparHTML(
+                                    item.lms
+                                )}
+                            </td>
+
+
+                            <td>
+                                ${escaparHTML(
+                                    item.nome
+                                )}
+                            </td>
+
+
+                            <td>
+                                ${escaparHTML(
+                                    item.codigo
+                                )}
+                            </td>
+
+
+                            <td>
+                                ${formatarData(
+                                    item.retirada
+                                )}
+                            </td>
+
+
+                            <td>
+                                ${
                                     item.devolucao
-                                )
-                                : "-"
-                        }
-                    </td>
+                                        ? formatarData(
+                                            item.devolucao
+                                        )
+                                        : "-"
+                                }
+                            </td>
 
-                    <td>
 
-                        <span
-                            class="status ${escaparHTML(
-                                item.status
-                            )}"
-                        >
-                            ${escaparHTML(
-                                formatarStatus(
-                                    item.status
-                                )
-                            )}
-                        </span>
+                            <td>
 
-                    </td>
+                                <span
+                                    class="status ${escaparHTML(
+                                        item.status
+                                    )}"
+                                >
+                                    ${escaparHTML(
+                                        formatarStatus(
+                                            item.status
+                                        )
+                                    )}
+                                </span>
 
-                    <td class="observacao-tabela">
+                            </td>
 
-                        ${
-                            item.observacao
-                                ? escaparHTML(
+
+                            <td class="observacao-tabela">
+
+                                ${
                                     item.observacao
-                                )
-                                : "-"
-                        }
+                                        ? escaparHTML(
+                                            item.observacao
+                                        )
+                                        : "-"
+                                }
 
-                    </td>
+                            </td>
 
-                    <td>
 
-                        <button
-                            class="btn-editar"
-                            onclick="abrirEdicao(${Number(
-                                item.id
-                            )})"
-                        >
-                            Editar
-                        </button>
+                            <td>
 
-                        <button
-                            class="btn-excluir"
-                            onclick="excluirRegistro(${Number(
-                                item.id
-                            )})"
-                        >
-                            Excluir
-                        </button>
+                                <button
+                                    class="btn-editar"
+                                    onclick="abrirEdicao(${id})"
+                                >
+                                    Editar
+                                </button>
 
-                    </td>
 
-                </tr>
+                                <button
+                                    class="btn-excluir"
+                                    onclick="excluirRegistro(${id})"
+                                >
+                                    Excluir
+                                </button>
 
-            `
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
             )
             .join("");
 
@@ -1760,6 +1979,134 @@ async function carregarHistorico() {
     atualizarPaginacaoHistorico(
         listaOrdenada.length
     );
+
+
+    atualizarControleSelecaoHistorico(
+        listaPagina
+    );
+
+}
+
+
+/* =========================================================
+   PREENCHER ANOS DO HISTÓRICO
+========================================================= */
+
+function preencherAnosHistorico() {
+
+    const select =
+        document.getElementById(
+            "filtroAnoHistorico"
+        );
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    const anoAtual =
+        new Date().getFullYear();
+
+
+    const anos =
+        new Set();
+
+
+    anos.add(
+        String(
+            anoAtual
+        )
+    );
+
+
+    registros.forEach(
+        item => {
+
+            if (!item.retirada) {
+
+                return;
+
+            }
+
+
+            const data =
+                new Date(
+                    item.retirada
+                );
+
+
+            if (
+                !Number.isNaN(
+                    data.getTime()
+                )
+            ) {
+
+                anos.add(
+                    String(
+                        data.getFullYear()
+                    )
+                );
+
+            }
+
+        }
+    );
+
+
+    const valorAtual =
+        select.value;
+
+
+    const listaAnos =
+        Array.from(
+            anos
+        )
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+                    Number(b) -
+                    Number(a)
+            );
+
+
+    select.innerHTML = `
+
+        <option value="">
+            Todos
+        </option>
+
+        ${
+            listaAnos
+                .map(
+                    ano => `
+
+                        <option value="${ano}">
+                            ${ano}
+                        </option>
+
+                    `
+                )
+                .join("")
+        }
+
+    `;
+
+
+    if (
+        listaAnos.includes(
+            valorAtual
+        )
+    ) {
+
+        select.value =
+            valorAtual;
+
+    }
 
 }
 
@@ -1803,20 +2150,26 @@ function atualizarPaginacaoHistorico(
                 "div"
             );
 
+
         paginacao.id =
             "paginacaoHistorico";
+
 
         paginacao.style.display =
             "flex";
 
+
         paginacao.style.alignItems =
             "center";
+
 
         paginacao.style.justifyContent =
             "center";
 
+
         paginacao.style.gap =
             "10px";
+
 
         paginacao.style.marginTop =
             "20px";
@@ -1881,6 +2234,7 @@ function atualizarPaginacaoHistorico(
             Anterior
         </button>
 
+
         <span>
 
             Página
@@ -1896,6 +2250,7 @@ function atualizarPaginacaoHistorico(
             </strong>
 
         </span>
+
 
         <button
             class="btn-secundario"
@@ -1944,6 +2299,23 @@ function paginaHistoricoAnterior() {
 
 function paginaHistoricoProxima() {
 
+    const totalPaginas =
+        Math.ceil(
+            obterQuantidadeFiltradaHistorico() /
+            REGISTROS_POR_PAGINA
+        );
+
+
+    if (
+        paginaHistoricoAtual >=
+        totalPaginas
+    ) {
+
+        return;
+
+    }
+
+
     paginaHistoricoAtual++;
 
     carregarHistorico();
@@ -1952,10 +2324,10 @@ function paginaHistoricoProxima() {
 
 
 /* =========================================================
-   MOSTRAR TODOS
+   QUANTIDADE FILTRADA DO HISTÓRICO
 ========================================================= */
 
-function mostrarTodos() {
+function obterQuantidadeFiltradaHistorico() {
 
     const campo =
         document.getElementById(
@@ -1963,14 +2335,593 @@ function mostrarTodos() {
         );
 
 
-    if (!campo) return;
+    const filtroStatus =
+        document.getElementById(
+            "filtroStatusHistorico"
+        );
 
 
-    campo.value = "";
+    const filtroMes =
+        document.getElementById(
+            "filtroMesHistorico"
+        );
+
+
+    const filtroAno =
+        document.getElementById(
+            "filtroAnoHistorico"
+        );
+
+
+    const termo =
+        normalizarTexto(
+            campo
+                ? campo.value
+                : ""
+        );
+
+
+    const status =
+        filtroStatus
+            ? filtroStatus.value
+            : "";
+
+
+    const mes =
+        filtroMes
+            ? filtroMes.value
+            : "";
+
+
+    const ano =
+        filtroAno
+            ? filtroAno.value
+            : "";
+
+
+    return registros.filter(
+        item => {
+
+            if (termo) {
+
+                const encontrou =
+
+                    normalizarTexto(
+                        item.lms
+                    ).includes(
+                        termo
+                    )
+
+                    ||
+
+                    normalizarTexto(
+                        item.nome
+                    ).includes(
+                        termo
+                    )
+
+                    ||
+
+                    normalizarTexto(
+                        item.codigo
+                    ).includes(
+                        termo
+                    );
+
+
+                if (!encontrou) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            if (
+                status &&
+                item.status !==
+                    status
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                mes ||
+                ano
+            ) {
+
+                if (!item.retirada) {
+
+                    return false;
+
+                }
+
+
+                const data =
+                    new Date(
+                        item.retirada
+                    );
+
+
+                if (
+                    Number.isNaN(
+                        data.getTime()
+                    )
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    mes &&
+                    String(
+                        data.getMonth() + 1
+                    ) !==
+                        mes
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    ano &&
+                    String(
+                        data.getFullYear()
+                    ) !==
+                        ano
+                ) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+    ).length;
+
+}
+
+
+/* =========================================================
+   MOSTRAR TODOS / LIMPAR FILTROS
+========================================================= */
+
+function mostrarTodos() {
+
+    limparFiltrosHistorico();
+
+}
+
+
+/* =========================================================
+   LIMPAR FILTROS DO HISTÓRICO
+========================================================= */
+
+function limparFiltrosHistorico() {
+
+    const campo =
+        document.getElementById(
+            "buscaHistorico"
+        );
+
+
+    const status =
+        document.getElementById(
+            "filtroStatusHistorico"
+        );
+
+
+    const mes =
+        document.getElementById(
+            "filtroMesHistorico"
+        );
+
+
+    const ano =
+        document.getElementById(
+            "filtroAnoHistorico"
+        );
+
+
+    if (campo) {
+
+        campo.value = "";
+
+    }
+
+
+    if (status) {
+
+        status.value = "";
+
+    }
+
+
+    if (mes) {
+
+        mes.value = "";
+
+    }
+
+
+    if (ano) {
+
+        ano.value = "";
+
+    }
+
 
     paginaHistoricoAtual = 1;
 
-    carregarHistorico();
+
+    carregarHistorico(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   SELECIONAR / DESELECIONAR REGISTRO
+========================================================= */
+
+function alternarSelecaoRegistro(
+    id,
+    selecionado
+) {
+
+    const numeroId =
+        Number(id);
+
+
+    if (selecionado) {
+
+        registrosSelecionados.add(
+            numeroId
+        );
+
+    }
+    else {
+
+        registrosSelecionados.delete(
+            numeroId
+        );
+
+    }
+
+
+    atualizarContadorSelecionados();
+
+    atualizarCheckboxSelecionarTodos();
+
+}
+
+
+/* =========================================================
+   SELECIONAR TODOS DA PÁGINA
+========================================================= */
+
+function selecionarTodosHistorico(
+    selecionado
+) {
+
+    const checkboxes =
+        document.querySelectorAll(
+            ".check-registro-historico"
+        );
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            const id =
+                Number(
+                    checkbox.value
+                );
+
+
+            checkbox.checked =
+                selecionado;
+
+
+            if (selecionado) {
+
+                registrosSelecionados.add(
+                    id
+                );
+
+            }
+            else {
+
+                registrosSelecionados.delete(
+                    id
+                );
+
+            }
+
+        }
+    );
+
+
+    atualizarContadorSelecionados();
+
+}
+
+
+/* =========================================================
+   ATUALIZAR CONTROLE DE SELEÇÃO
+========================================================= */
+
+function atualizarControleSelecaoHistorico(
+    listaPagina
+) {
+
+    atualizarContadorSelecionados();
+
+    atualizarCheckboxSelecionarTodos(
+        listaPagina
+    );
+
+}
+
+
+/* =========================================================
+   ATUALIZAR CHECKBOX "SELECIONAR TODOS"
+========================================================= */
+
+function atualizarCheckboxSelecionarTodos(
+    listaPagina = null
+) {
+
+    const checkboxTodos =
+        document.getElementById(
+            "selecionarTodosHistorico"
+        );
+
+
+    if (!checkboxTodos) {
+
+        return;
+
+    }
+
+
+    const checkboxes =
+        document.querySelectorAll(
+            ".check-registro-historico"
+        );
+
+
+    if (!checkboxes.length) {
+
+        checkboxTodos.checked =
+            false;
+
+        checkboxTodos.indeterminate =
+            false;
+
+        return;
+
+    }
+
+
+    let selecionadosNaPagina =
+        0;
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            if (
+                checkbox.checked
+            ) {
+
+                selecionadosNaPagina++;
+
+            }
+
+        }
+    );
+
+
+    checkboxTodos.checked =
+        selecionadosNaPagina ===
+        checkboxes.length;
+
+
+    checkboxTodos.indeterminate =
+        selecionadosNaPagina > 0 &&
+        selecionadosNaPagina <
+            checkboxes.length;
+
+}
+
+
+/* =========================================================
+   CONTADOR DE SELECIONADOS
+========================================================= */
+
+function atualizarContadorSelecionados() {
+
+    const contador =
+        document.getElementById(
+            "contadorSelecionadosHistorico"
+        );
+
+
+    const botao =
+        document.getElementById(
+            "btnExcluirSelecionados"
+        );
+
+
+    const quantidade =
+        registrosSelecionados.size;
+
+
+    if (contador) {
+
+        contador.textContent =
+            quantidade === 1
+                ? "1 selecionado"
+                : `${quantidade} selecionados`;
+
+    }
+
+
+    if (botao) {
+
+        botao.disabled =
+            quantidade === 0;
+
+    }
+
+}
+
+
+/* =========================================================
+   EXCLUIR SELECIONADOS
+========================================================= */
+
+async function excluirSelecionados() {
+
+    const ids =
+        Array.from(
+            registrosSelecionados
+        )
+            .map(
+                id => Number(id)
+            )
+            .filter(
+                id =>
+                    Number.isFinite(
+                        id
+                    )
+            );
+
+
+    if (!ids.length) {
+
+        alert(
+            "Selecione pelo menos um registro."
+        );
+
+        return;
+
+    }
+
+
+    const confirmar =
+        confirm(
+            `Tem certeza que deseja excluir ${ids.length} registro${ids.length === 1 ? "" : "s"} selecionado${ids.length === 1 ? "" : "s"}?\n\nEssa ação não poderá ser desfeita.`
+        );
+
+
+    if (!confirmar) {
+
+        return;
+
+    }
+
+
+    const {
+        error
+    } = await db
+        .from("registros")
+        .delete()
+        .in(
+            "id",
+            ids
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Erro ao excluir registros selecionados:",
+            error
+        );
+
+
+        alert(
+            "Erro ao excluir os registros selecionados."
+        );
+
+        return;
+
+    }
+
+
+    registros =
+        registros.filter(
+            item =>
+                !ids.includes(
+                    Number(
+                        item.id
+                    )
+                )
+        );
+
+
+    ids.forEach(
+        id => {
+
+            registrosSelecionados.delete(
+                id
+            );
+
+        }
+    );
+
+
+    atualizarDashboard();
+
+    preencherAnosHistorico();
+
+
+    const totalFiltrado =
+        obterQuantidadeFiltradaHistorico();
+
+
+    const totalPaginas =
+        Math.max(
+            1,
+            Math.ceil(
+                totalFiltrado /
+                REGISTROS_POR_PAGINA
+            )
+        );
+
+
+    if (
+        paginaHistoricoAtual >
+        totalPaginas
+    ) {
+
+        paginaHistoricoAtual =
+            totalPaginas;
+
+    }
+
+
+    await carregarHistorico();
+
+
+    alert(
+        `${ids.length} registro${ids.length === 1 ? "" : "s"} excluído${ids.length === 1 ? "" : "s"} com sucesso.`
+    );
 
 }
 
@@ -1997,30 +2948,36 @@ function abrirEdicao(id) {
             "editarId"
         );
 
+
     const editarLms =
         document.getElementById(
             "editarLms"
         );
+
 
     const editarNome =
         document.getElementById(
             "editarNome"
         );
 
+
     const editarCodigo =
         document.getElementById(
             "editarCodigo"
         );
+
 
     const editarStatus =
         document.getElementById(
             "editarStatus"
         );
 
+
     const editarObservacao =
         document.getElementById(
             "editarObservacao"
         );
+
 
     const modal =
         document.getElementById(
@@ -2046,17 +3003,22 @@ function abrirEdicao(id) {
     editarId.value =
         registro.id;
 
+
     editarLms.value =
         registro.lms;
+
 
     editarNome.value =
         registro.nome;
 
+
     editarCodigo.value =
         registro.codigo;
 
+
     editarStatus.value =
         registro.status;
+
 
     editarObservacao.value =
         registro.observacao ||
@@ -2325,6 +3287,8 @@ async function salvarEdicao() {
 
     atualizarDashboard();
 
+    preencherAnosHistorico();
+
     await carregarHistorico();
 
 }
@@ -2353,7 +3317,7 @@ function fecharModal() {
 
 
 /* =========================================================
-   EXCLUIR REGISTRO
+   EXCLUIR REGISTRO INDIVIDUAL
 ========================================================= */
 
 async function excluirRegistro(id) {
@@ -2402,7 +3366,14 @@ async function excluirRegistro(id) {
         );
 
 
+    registrosSelecionados.delete(
+        Number(id)
+    );
+
+
     atualizarDashboard();
+
+    preencherAnosHistorico();
 
     await carregarHistorico();
 
@@ -2431,15 +3402,18 @@ function abrirEdicaoColaborador(id) {
             "editarColaboradorId"
         );
 
+
     const campoLms =
         document.getElementById(
             "editarColaboradorLms"
         );
 
+
     const campoNome =
         document.getElementById(
             "editarColaboradorNome"
         );
+
 
     const modal =
         document.getElementById(
@@ -2462,8 +3436,10 @@ function abrirEdicaoColaborador(id) {
     campoId.value =
         colaborador.id;
 
+
     campoLms.value =
         colaborador.lms;
+
 
     campoNome.value =
         colaborador.nome;
@@ -2866,17 +3842,20 @@ function normalizarTexto(
     texto
 ) {
 
-    if (
-        texto === undefined ||
-        texto === null
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(texto)
+    return String(
+        texto ?? ""
+    )
+        .normalize(
+            "NFD"
+        )
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .replace(
+            /[\r\n\t]/g,
+            ""
+        )
         .trim()
         .toLowerCase();
 
@@ -2961,10 +3940,6 @@ document.addEventListener(
             document.activeElement;
 
 
-        /* =================================================
-           ENTER NO LMS
-        ================================================= */
-
         if (
             elemento &&
             elemento.id ===
@@ -3004,10 +3979,6 @@ document.addEventListener(
         }
 
 
-        /* =================================================
-           ENTER NO CÓDIGO
-        ================================================= */
-
         if (
             elemento &&
             elemento.id ===
@@ -3041,10 +4012,6 @@ document.addEventListener(
         );
 
 
-        /* =================================================
-           VERIFICAR SUPABASE
-        ================================================= */
-
         const supabaseOK =
             inicializarSupabase();
 
@@ -3059,10 +4026,6 @@ document.addEventListener(
 
         }
 
-
-        /* =================================================
-           CARREGAR DADOS
-        ================================================= */
 
         try {
 
