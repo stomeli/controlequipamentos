@@ -23,6 +23,223 @@
         href="style.css"
     >
 
+    <style>
+
+        /* =====================================================
+           FILTRO DE DATA DO HISTÓRICO
+        ===================================================== */
+
+        .filtro-data-wrapper {
+            position: relative;
+        }
+
+        .btn-filtro-data {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 14px;
+            border: 1px solid #d5d5d5;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .btn-filtro-data:hover {
+            border-color: #999;
+            background: #fafafa;
+        }
+
+        .painel-filtro-data {
+            display: none;
+            position: absolute;
+            z-index: 1000;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 340px;
+            max-width: 90vw;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+        }
+
+        .painel-filtro-data.aberto {
+            display: block;
+        }
+
+        .calendario-topo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .calendario-topo strong {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .btn-calendario {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .btn-calendario:hover {
+            background: #f3f3f3;
+        }
+
+        .calendario-semana,
+        .calendario-dias {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendario-semana {
+            margin-bottom: 5px;
+        }
+
+        .calendario-semana span {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #777;
+            padding: 5px 0;
+        }
+
+        .dia-calendario {
+            height: 36px;
+            border: 0;
+            border-radius: 7px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .dia-calendario:hover {
+            background: #f0f0f0;
+        }
+
+        .dia-calendario.vazio {
+            cursor: default;
+            background: transparent;
+        }
+
+        .dia-calendario.hoje {
+            font-weight: 700;
+            border: 1px solid #bbb;
+        }
+
+        .dia-calendario.selecionado {
+            background: #111;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .seletor-data-extra {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .seletor-data-extra label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .seletor-data-extra select {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid #d5d5d5;
+            border-radius: 7px;
+            padding: 7px;
+            background: #fff;
+        }
+
+        .acoes-filtro-data {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .acoes-filtro-data button {
+            flex: 1;
+        }
+
+        /* =====================================================
+           SELEÇÃO DOS REGISTROS
+        ===================================================== */
+
+        .acoes-selecao-historico {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f5f5f5;
+        }
+
+        .contador-selecao {
+            font-weight: 600;
+        }
+
+        .checkbox-registro {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-todos {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* =====================================================
+           RESPONSIVO
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .painel-filtro-data {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .seletor-data-extra {
+                grid-template-columns: 1fr;
+            }
+
+            .acoes-selecao-historico {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 <body>
@@ -365,7 +582,6 @@
 
         <div class="form-grid">
 
-
             <div class="campo">
 
                 <label for="lms">
@@ -499,8 +715,6 @@
         </h3>
 
 
-        <!-- BUSCA POR TEXTO -->
-
         <div class="busca">
 
             <input
@@ -512,12 +726,12 @@
         </div>
 
 
-        <!-- FILTROS -->
-
         <div
             class="form-grid"
             style="margin-top: 15px;"
         >
+
+            <!-- STATUS -->
 
             <div class="campo">
 
@@ -548,91 +762,198 @@
             </div>
 
 
-            <div class="campo">
+            <!-- FILTRO DE DATA -->
 
-                <label for="filtroMesHistorico">
-                    Mês
+            <div class="campo filtro-data-wrapper">
+
+                <label>
+                    Data
                 </label>
 
-                <select id="filtroMesHistorico">
-
-                    <option value="">
-                        Todos
-                    </option>
-
-                    <option value="1">
-                        Janeiro
-                    </option>
-
-                    <option value="2">
-                        Fevereiro
-                    </option>
-
-                    <option value="3">
-                        Março
-                    </option>
-
-                    <option value="4">
-                        Abril
-                    </option>
-
-                    <option value="5">
-                        Maio
-                    </option>
-
-                    <option value="6">
-                        Junho
-                    </option>
-
-                    <option value="7">
-                        Julho
-                    </option>
-
-                    <option value="8">
-                        Agosto
-                    </option>
-
-                    <option value="9">
-                        Setembro
-                    </option>
-
-                    <option value="10">
-                        Outubro
-                    </option>
-
-                    <option value="11">
-                        Novembro
-                    </option>
-
-                    <option value="12">
-                        Dezembro
-                    </option>
-
-                </select>
-
-            </div>
+                <button
+                    type="button"
+                    id="btnFiltroDataHistorico"
+                    class="btn-filtro-data"
+                    onclick="alternarFiltroDataHistorico()"
+                >
+                    📅 Filtrar por data
+                </button>
 
 
-            <div class="campo">
+                <div
+                    id="painelFiltroDataHistorico"
+                    class="painel-filtro-data"
+                >
 
-                <label for="filtroAnoHistorico">
-                    Ano
-                </label>
+                    <div class="calendario-topo">
 
-                <select id="filtroAnoHistorico">
+                        <button
+                            type="button"
+                            class="btn-calendario"
+                            onclick="mudarMesCalendario(-1)"
+                        >
+                            ‹
+                        </button>
 
-                    <option value="">
-                        Todos
-                    </option>
 
-                </select>
+                        <strong
+                            id="mesAnoCalendarioHistorico"
+                        >
+                            -
+                        </strong>
+
+
+                        <button
+                            type="button"
+                            class="btn-calendario"
+                            onclick="mudarMesCalendario(1)"
+                        >
+                            ›
+                        </button>
+
+                    </div>
+
+
+                    <div class="calendario-semana">
+
+                        <span>Dom</span>
+                        <span>Seg</span>
+                        <span>Ter</span>
+                        <span>Qua</span>
+                        <span>Qui</span>
+                        <span>Sex</span>
+                        <span>Sáb</span>
+
+                    </div>
+
+
+                    <div
+                        id="calendarioHistorico"
+                        class="calendario-dias"
+                    ></div>
+
+
+                    <div class="seletor-data-extra">
+
+                        <div>
+
+                            <label for="mesFiltroCalendarioHistorico">
+                                Mês
+                            </label>
+
+                            <select
+                                id="mesFiltroCalendarioHistorico"
+                                onchange="alterarMesCalendarioPorSelect()"
+                            >
+
+                                <option value="">
+                                    Todos
+                                </option>
+
+                                <option value="1">
+                                    Janeiro
+                                </option>
+
+                                <option value="2">
+                                    Fevereiro
+                                </option>
+
+                                <option value="3">
+                                    Março
+                                </option>
+
+                                <option value="4">
+                                    Abril
+                                </option>
+
+                                <option value="5">
+                                    Maio
+                                </option>
+
+                                <option value="6">
+                                    Junho
+                                </option>
+
+                                <option value="7">
+                                    Julho
+                                </option>
+
+                                <option value="8">
+                                    Agosto
+                                </option>
+
+                                <option value="9">
+                                    Setembro
+                                </option>
+
+                                <option value="10">
+                                    Outubro
+                                </option>
+
+                                <option value="11">
+                                    Novembro
+                                </option>
+
+                                <option value="12">
+                                    Dezembro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div>
+
+                            <label for="anoFiltroCalendarioHistorico">
+                                Ano
+                            </label>
+
+                            <select
+                                id="anoFiltroCalendarioHistorico"
+                                onchange="alterarAnoCalendarioPorSelect()"
+                            >
+
+                                <option value="">
+                                    Todos
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="acoes-filtro-data">
+
+                        <button
+                            type="button"
+                            class="btn-secundario"
+                            onclick="limparFiltroDataHistorico()"
+                        >
+                            Limpar
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn-principal"
+                            onclick="aplicarFiltroDataHistorico()"
+                        >
+                            Aplicar
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
 
-        <!-- BOTÕES -->
+        <!-- BOTÕES DOS FILTROS -->
 
         <div
             class="acoes"
@@ -641,7 +962,7 @@
 
             <button
                 class="btn-principal"
-                onclick="carregarHistorico(true)"
+                onclick="aplicarFiltrosHistorico()"
             >
                 Buscar
             </button>
@@ -657,47 +978,29 @@
         </div>
 
 
-        <!-- CONTROLE DE SELEÇÃO -->
+        <!-- =========================
+             SELEÇÃO DOS REGISTROS
+        ========================= -->
 
         <div
             id="acoesSelecaoHistorico"
-            style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 15px;
-                flex-wrap: wrap;
-                margin-top: 20px;
-                padding: 15px;
-                border-radius: 8px;
-                background: #f5f5f5;
-            "
+            class="acoes-selecao-historico"
         >
 
-            <label
-                style="
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    font-weight: 600;
-                "
-            >
+            <div>
 
-                <input
-                    type="checkbox"
-                    id="selecionarTodosHistorico"
-                    onchange="selecionarTodosHistorico(this.checked)"
+                <strong>
+                    Registros selecionados:
+                </strong>
+
+                <span
+                    id="contadorSelecionadosHistorico"
+                    class="contador-selecao"
                 >
+                    0 selecionados
+                </span>
 
-                Selecionar todos desta página
-
-            </label>
-
-
-            <span id="contadorSelecionadosHistorico">
-                0 selecionados
-            </span>
+            </div>
 
 
             <button
@@ -720,37 +1023,53 @@
 
                     <tr>
 
-                        <th style="width: 50px;">
-                            Selecionar
+                        <th style="width: 55px; text-align: center;">
+
+                            <input
+                                type="checkbox"
+                                id="selecionarTodosHistorico"
+                                class="checkbox-todos"
+                                title="Selecionar todos desta página"
+                                onchange="selecionarTodosHistorico(this.checked)"
+                            >
+
                         </th>
+
 
                         <th>
                             LMS
                         </th>
 
+
                         <th>
                             Colaborador
                         </th>
+
 
                         <th>
                             Equipamento
                         </th>
 
+
                         <th>
                             Retirada
                         </th>
+
 
                         <th>
                             Devolução
                         </th>
 
+
                         <th>
                             Status
                         </th>
 
+
                         <th>
                             Observação
                         </th>
+
 
                         <th>
                             Ações
