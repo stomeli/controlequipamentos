@@ -32,8 +32,36 @@ let paginaHistoricoAtual = 1;
    SELEÇÃO DO HISTÓRICO
 ========================================================= */
 
-let registrosSelecionados =
-    new Set();
+let registrosSelecionados = new Set();
+
+
+/* =========================================================
+   FILTRO DE DATA
+========================================================= */
+
+let filtroDataHistorico = {
+    dia: "",
+    mes: "",
+    ano: ""
+};
+
+let calendarioDataAtual = new Date();
+
+
+const nomesMeses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro"
+];
 
 
 /* =========================================================
@@ -90,11 +118,6 @@ async function carregarDados() {
 
 
     try {
-
-        console.log(
-            "Iniciando carregamento dos dados..."
-        );
-
 
         const {
             data: dadosRegistros,
@@ -158,21 +181,9 @@ async function carregarDados() {
             dadosColaboradores || [];
 
 
-        console.log(
-            "Registros carregados:",
-            registros.length
-        );
-
-
-        console.log(
-            "Colaboradores carregados:",
-            colaboradores.length
-        );
-
-
-        preencherAnosHistorico();
-
         atualizarDashboard();
+
+        inicializarFiltroDataHistorico();
 
     }
     catch (erro) {
@@ -273,9 +284,11 @@ function mostrarPagina(
 
         paginaHistoricoAtual = 1;
 
-        preencherAnosHistorico();
+        inicializarFiltroDataHistorico();
 
-        carregarHistorico();
+        carregarHistorico(
+            true
+        );
 
     }
 
@@ -816,10 +829,6 @@ async function registrarRetirada() {
     }
 
 
-    const nomeColaborador =
-        colaborador.nome;
-
-
     const {
         data: equipamentoExistente,
         error: erroBusca
@@ -880,7 +889,7 @@ async function registrarRetirada() {
                     colaborador.lms,
 
                 nome:
-                    nomeColaborador,
+                    colaborador.nome,
 
                 codigo:
                     codigo,
@@ -933,47 +942,18 @@ async function registrarRetirada() {
     }
 
 
-    console.log(
-        "Registro salvo:",
+    registros.push(
         data
     );
 
 
-    const indiceExistente =
-        registros.findIndex(
-            item =>
-                Number(item.id) ===
-                Number(data.id)
-        );
-
-
-    if (
-        indiceExistente ===
-        -1
-    ) {
-
-        registros.push(
-            data
-        );
-
-    }
-    else {
-
-        registros[
-            indiceExistente
-        ] = data;
-
-    }
-
-
-    preencherAnosHistorico();
-
     atualizarDashboard();
-
 
     paginaHistoricoAtual = 1;
 
-    await carregarHistorico();
+    await carregarHistorico(
+        true
+    );
 
 
     campoLms.value = "";
@@ -1294,7 +1274,6 @@ function buscarDashboard() {
 
 /* =========================================================
    BUSCA NA RETIRADA
-   SOMENTE STATUS "RETIRADO"
 ========================================================= */
 
 function buscarRetirada() {
@@ -1546,6 +1525,8 @@ async function carregarHistorico(
 
         paginaHistoricoAtual = 1;
 
+        registrosSelecionados.clear();
+
     }
 
 
@@ -1561,33 +1542,9 @@ async function carregarHistorico(
         );
 
 
-    const filtroMes =
-        document.getElementById(
-            "filtroMesHistorico"
-        );
-
-
-    const filtroAno =
-        document.getElementById(
-            "filtroAnoHistorico"
-        );
-
-
     const statusSelecionado =
         filtroStatus
             ? filtroStatus.value
-            : "";
-
-
-    const mesSelecionado =
-        filtroMes
-            ? filtroMes.value
-            : "";
-
-
-    const anoSelecionado =
-        filtroAno
-            ? filtroAno.value
             : "";
 
 
@@ -1618,16 +1575,11 @@ async function carregarHistorico(
         data || [];
 
 
-    preencherAnosHistorico();
-
-
     let lista =
         registros.filter(
             item => {
 
-                /* =========================
-                   BUSCA TEXTO
-                ========================= */
+                /* BUSCA */
 
                 if (termo) {
 
@@ -1665,9 +1617,7 @@ async function carregarHistorico(
                 }
 
 
-                /* =========================
-                   FILTRO STATUS
-                ========================= */
+                /* STATUS */
 
                 if (
                     statusSelecionado &&
@@ -1680,13 +1630,12 @@ async function carregarHistorico(
                 }
 
 
-                /* =========================
-                   FILTRO DATA
-                ========================= */
+                /* DATA */
 
                 if (
-                    mesSelecionado ||
-                    anoSelecionado
+                    filtroDataHistorico.dia ||
+                    filtroDataHistorico.mes ||
+                    filtroDataHistorico.ano
                 ) {
 
                     if (!item.retirada) {
@@ -1713,6 +1662,12 @@ async function carregarHistorico(
                     }
 
 
+                    const dia =
+                        String(
+                            dataRetirada.getDate()
+                        );
+
+
                     const mes =
                         String(
                             dataRetirada.getMonth() + 1
@@ -1726,9 +1681,9 @@ async function carregarHistorico(
 
 
                     if (
-                        mesSelecionado &&
-                        mes !==
-                            mesSelecionado
+                        filtroDataHistorico.dia &&
+                        dia !==
+                            filtroDataHistorico.dia
                     ) {
 
                         return false;
@@ -1737,9 +1692,20 @@ async function carregarHistorico(
 
 
                     if (
-                        anoSelecionado &&
+                        filtroDataHistorico.mes &&
+                        mes !==
+                            filtroDataHistorico.mes
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        filtroDataHistorico.ano &&
                         ano !==
-                            anoSelecionado
+                            filtroDataHistorico.ano
                     ) {
 
                         return false;
@@ -1770,15 +1736,9 @@ async function carregarHistorico(
         `;
 
 
-        atualizarPaginacaoHistorico(
-            0
-        );
+        atualizarPaginacaoHistorico(0);
 
-
-        atualizarControleSelecaoHistorico(
-            []
-        );
-
+        atualizarControleSelecaoHistorico([]);
 
         atualizarDashboard();
 
@@ -1862,11 +1822,11 @@ async function carregarHistorico(
 
                         <tr>
 
-                            <td>
+                            <td style="text-align: center;">
 
                                 <input
                                     type="checkbox"
-                                    class="check-registro-historico"
+                                    class="check-registro-historico checkbox-registro"
                                     value="${id}"
                                     ${
                                         selecionado
@@ -1874,6 +1834,7 @@ async function carregarHistorico(
                                             : ""
                                     }
                                     onchange="alternarSelecaoRegistro(${id}, this.checked)"
+                                    title="Selecionar este registro"
                                 >
 
                             </td>
@@ -1989,36 +1950,34 @@ async function carregarHistorico(
 
 
 /* =========================================================
-   PREENCHER ANOS DO HISTÓRICO
+   FILTRO DE DATA
 ========================================================= */
 
-function preencherAnosHistorico() {
+function inicializarFiltroDataHistorico() {
 
-    const select =
+    const anoSelect =
         document.getElementById(
-            "filtroAnoHistorico"
+            "anoFiltroCalendarioHistorico"
         );
 
 
-    if (!select) {
+    if (!anoSelect) {
 
         return;
 
     }
 
 
-    const anoAtual =
-        new Date().getFullYear();
-
-
     const anos =
         new Set();
 
 
+    const anoAtual =
+        new Date().getFullYear();
+
+
     anos.add(
-        String(
-            anoAtual
-        )
+        String(anoAtual)
     );
 
 
@@ -2057,24 +2016,20 @@ function preencherAnosHistorico() {
 
 
     const valorAtual =
-        select.value;
+        anoSelect.value;
 
 
     const listaAnos =
         Array.from(
             anos
-        )
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    Number(b) -
-                    Number(a)
-            );
+        ).sort(
+            (a, b) =>
+                Number(b) -
+                Number(a)
+        );
 
 
-    select.innerHTML = `
+    anoSelect.innerHTML = `
 
         <option value="">
             Todos
@@ -2084,11 +2039,9 @@ function preencherAnosHistorico() {
             listaAnos
                 .map(
                     ano => `
-
                         <option value="${ano}">
                             ${ano}
                         </option>
-
                     `
                 )
                 .join("")
@@ -2103,8 +2056,50 @@ function preencherAnosHistorico() {
         )
     ) {
 
-        select.value =
+        anoSelect.value =
             valorAtual;
+
+    }
+
+
+    renderizarCalendarioHistorico();
+
+    atualizarBotaoFiltroData();
+
+}
+
+
+/* =========================================================
+   ABRIR / FECHAR CALENDÁRIO
+========================================================= */
+
+function alternarFiltroDataHistorico() {
+
+    const painel =
+        document.getElementById(
+            "painelFiltroDataHistorico"
+        );
+
+
+    if (!painel) {
+
+        return;
+
+    }
+
+
+    painel.classList.toggle(
+        "aberto"
+    );
+
+
+    if (
+        painel.classList.contains(
+            "aberto"
+        )
+    ) {
+
+        renderizarCalendarioHistorico();
 
     }
 
@@ -2112,7 +2107,578 @@ function preencherAnosHistorico() {
 
 
 /* =========================================================
-   PAGINAÇÃO DO HISTÓRICO
+   RENDERIZAR CALENDÁRIO
+========================================================= */
+
+function renderizarCalendarioHistorico() {
+
+    const calendario =
+        document.getElementById(
+            "calendarioHistorico"
+        );
+
+
+    const titulo =
+        document.getElementById(
+            "mesAnoCalendarioHistorico"
+        );
+
+
+    if (
+        !calendario ||
+        !titulo
+    ) {
+
+        return;
+
+    }
+
+
+    const ano =
+        calendarioDataAtual.getFullYear();
+
+
+    const mes =
+        calendarioDataAtual.getMonth();
+
+
+    titulo.textContent =
+        `${nomesMeses[mes]} de ${ano}`;
+
+
+    const primeiroDia =
+        new Date(
+            ano,
+            mes,
+            1
+        ).getDay();
+
+
+    const ultimoDia =
+        new Date(
+            ano,
+            mes + 1,
+            0
+        ).getDate();
+
+
+    const hoje =
+        new Date();
+
+
+    let html = "";
+
+
+    for (
+        let i = 0;
+        i < primeiroDia;
+        i++
+    ) {
+
+        html += `
+
+            <button
+                type="button"
+                class="dia-calendario vazio"
+                disabled
+            ></button>
+
+        `;
+
+    }
+
+
+    for (
+        let dia = 1;
+        dia <= ultimoDia;
+        dia++
+    ) {
+
+        const diaTexto =
+            String(dia);
+
+
+        const mesTexto =
+            String(mes + 1);
+
+
+        const anoTexto =
+            String(ano);
+
+
+        const selecionado =
+            filtroDataHistorico.dia ===
+                diaTexto &&
+            filtroDataHistorico.mes ===
+                mesTexto &&
+            filtroDataHistorico.ano ===
+                anoTexto;
+
+
+        const ehHoje =
+            hoje.getDate() === dia &&
+            hoje.getMonth() === mes &&
+            hoje.getFullYear() === ano;
+
+
+        html += `
+
+            <button
+                type="button"
+                class="dia-calendario
+                    ${selecionado ? "selecionado" : ""}
+                    ${ehHoje ? "hoje" : ""}
+                "
+                onclick="selecionarDiaCalendario(${dia})"
+            >
+                ${dia}
+            </button>
+
+        `;
+
+    }
+
+
+    calendario.innerHTML =
+        html;
+
+
+    const mesSelect =
+        document.getElementById(
+            "mesFiltroCalendarioHistorico"
+        );
+
+
+    const anoSelect =
+        document.getElementById(
+            "anoFiltroCalendarioHistorico"
+        );
+
+
+    if (mesSelect) {
+
+        mesSelect.value =
+            filtroDataHistorico.mes || "";
+
+    }
+
+
+    if (anoSelect) {
+
+        anoSelect.value =
+            filtroDataHistorico.ano || "";
+
+    }
+
+}
+
+
+/* =========================================================
+   MUDAR MÊS DO CALENDÁRIO
+========================================================= */
+
+function mudarMesCalendario(
+    quantidade
+) {
+
+    calendarioDataAtual =
+        new Date(
+            calendarioDataAtual.getFullYear(),
+            calendarioDataAtual.getMonth() +
+                quantidade,
+            1
+        );
+
+
+    renderizarCalendarioHistorico();
+
+}
+
+
+/* =========================================================
+   SELECIONAR DIA
+========================================================= */
+
+function selecionarDiaCalendario(
+    dia
+) {
+
+    const ano =
+        calendarioDataAtual.getFullYear();
+
+
+    const mes =
+        calendarioDataAtual.getMonth() + 1;
+
+
+    filtroDataHistorico.dia =
+        String(dia);
+
+
+    filtroDataHistorico.mes =
+        String(mes);
+
+
+    filtroDataHistorico.ano =
+        String(ano);
+
+
+    renderizarCalendarioHistorico();
+
+}
+
+
+/* =========================================================
+   ALTERAR MÊS PELO SELECT
+========================================================= */
+
+function alterarMesCalendarioPorSelect() {
+
+    const select =
+        document.getElementById(
+            "mesFiltroCalendarioHistorico"
+        );
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    const mes =
+        select.value;
+
+
+    filtroDataHistorico.mes =
+        mes;
+
+
+    filtroDataHistorico.dia =
+        "";
+
+
+    if (mes) {
+
+        calendarioDataAtual =
+            new Date(
+                calendarioDataAtual.getFullYear(),
+                Number(mes) - 1,
+                1
+            );
+
+    }
+
+
+    renderizarCalendarioHistorico();
+
+}
+
+
+/* =========================================================
+   ALTERAR ANO PELO SELECT
+========================================================= */
+
+function alterarAnoCalendarioPorSelect() {
+
+    const select =
+        document.getElementById(
+            "anoFiltroCalendarioHistorico"
+        );
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    const ano =
+        select.value;
+
+
+    filtroDataHistorico.ano =
+        ano;
+
+
+    filtroDataHistorico.dia =
+        "";
+
+
+    if (ano) {
+
+        calendarioDataAtual =
+            new Date(
+                Number(ano),
+                calendarioDataAtual.getMonth(),
+                1
+            );
+
+    }
+
+
+    renderizarCalendarioHistorico();
+
+}
+
+
+/* =========================================================
+   APLICAR FILTRO DE DATA
+========================================================= */
+
+function aplicarFiltroDataHistorico() {
+
+    const painel =
+        document.getElementById(
+            "painelFiltroDataHistorico"
+        );
+
+
+    paginaHistoricoAtual = 1;
+
+    registrosSelecionados.clear();
+
+
+    atualizarBotaoFiltroData();
+
+
+    if (painel) {
+
+        painel.classList.remove(
+            "aberto"
+        );
+
+    }
+
+
+    carregarHistorico(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   LIMPAR FILTRO DE DATA
+========================================================= */
+
+function limparFiltroDataHistorico() {
+
+    filtroDataHistorico = {
+        dia: "",
+        mes: "",
+        ano: ""
+    };
+
+
+    calendarioDataAtual =
+        new Date();
+
+
+    const painel =
+        document.getElementById(
+            "painelFiltroDataHistorico"
+        );
+
+
+    registrosSelecionados.clear();
+
+
+    renderizarCalendarioHistorico();
+
+    atualizarBotaoFiltroData();
+
+
+    if (painel) {
+
+        painel.classList.remove(
+            "aberto"
+        );
+
+    }
+
+
+    paginaHistoricoAtual = 1;
+
+    carregarHistorico(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   TEXTO DO BOTÃO DO FILTRO
+========================================================= */
+
+function atualizarBotaoFiltroData() {
+
+    const botao =
+        document.getElementById(
+            "btnFiltroDataHistorico"
+        );
+
+
+    if (!botao) {
+
+        return;
+
+    }
+
+
+    const {
+        dia,
+        mes,
+        ano
+    } =
+        filtroDataHistorico;
+
+
+    if (
+        dia &&
+        mes &&
+        ano
+    ) {
+
+        botao.textContent =
+            `📅 ${String(dia).padStart(2, "0")}/${String(mes).padStart(2, "0")}/${ano}`;
+
+        return;
+
+    }
+
+
+    if (
+        mes &&
+        ano
+    ) {
+
+        botao.textContent =
+            `📅 ${nomesMeses[Number(mes) - 1]} de ${ano}`;
+
+        return;
+
+    }
+
+
+    if (mes) {
+
+        botao.textContent =
+            `📅 ${nomesMeses[Number(mes) - 1]}`;
+
+        return;
+
+    }
+
+
+    if (ano) {
+
+        botao.textContent =
+            `📅 Ano ${ano}`;
+
+        return;
+
+    }
+
+
+    botao.textContent =
+        "📅 Filtrar por data";
+
+}
+
+
+/* =========================================================
+   APLICAR FILTROS DO HISTÓRICO
+========================================================= */
+
+function aplicarFiltrosHistorico() {
+
+    paginaHistoricoAtual = 1;
+
+    registrosSelecionados.clear();
+
+
+    carregarHistorico(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   LIMPAR FILTROS
+========================================================= */
+
+function limparFiltrosHistorico() {
+
+    const campo =
+        document.getElementById(
+            "buscaHistorico"
+        );
+
+
+    const status =
+        document.getElementById(
+            "filtroStatusHistorico"
+        );
+
+
+    if (campo) {
+
+        campo.value = "";
+
+    }
+
+
+    if (status) {
+
+        status.value = "";
+
+    }
+
+
+    filtroDataHistorico = {
+        dia: "",
+        mes: "",
+        ano: ""
+    };
+
+
+    calendarioDataAtual =
+        new Date();
+
+
+    registrosSelecionados.clear();
+
+
+    inicializarFiltroDataHistorico();
+
+
+    paginaHistoricoAtual = 1;
+
+
+    carregarHistorico(
+        true
+    );
+
+}
+
+
+/* =========================================================
+   MOSTRAR TODOS
+========================================================= */
+
+function mostrarTodos() {
+
+    limparFiltrosHistorico();
+
+}
+
+
+/* =========================================================
+   PAGINAÇÃO
 ========================================================= */
 
 function atualizarPaginacaoHistorico(
@@ -2270,10 +2836,6 @@ function atualizarPaginacaoHistorico(
 }
 
 
-/* =========================================================
-   PÁGINA ANTERIOR
-========================================================= */
-
 function paginaHistoricoAnterior() {
 
     if (
@@ -2292,10 +2854,6 @@ function paginaHistoricoAnterior() {
 
 }
 
-
-/* =========================================================
-   PRÓXIMA PÁGINA
-========================================================= */
 
 function paginaHistoricoProxima() {
 
@@ -2324,7 +2882,7 @@ function paginaHistoricoProxima() {
 
 
 /* =========================================================
-   QUANTIDADE FILTRADA DO HISTÓRICO
+   QUANTIDADE FILTRADA
 ========================================================= */
 
 function obterQuantidadeFiltradaHistorico() {
@@ -2341,18 +2899,6 @@ function obterQuantidadeFiltradaHistorico() {
         );
 
 
-    const filtroMes =
-        document.getElementById(
-            "filtroMesHistorico"
-        );
-
-
-    const filtroAno =
-        document.getElementById(
-            "filtroAnoHistorico"
-        );
-
-
     const termo =
         normalizarTexto(
             campo
@@ -2364,18 +2910,6 @@ function obterQuantidadeFiltradaHistorico() {
     const status =
         filtroStatus
             ? filtroStatus.value
-            : "";
-
-
-    const mes =
-        filtroMes
-            ? filtroMes.value
-            : "";
-
-
-    const ano =
-        filtroAno
-            ? filtroAno.value
             : "";
 
 
@@ -2430,8 +2964,9 @@ function obterQuantidadeFiltradaHistorico() {
 
 
             if (
-                mes ||
-                ano
+                filtroDataHistorico.dia ||
+                filtroDataHistorico.mes ||
+                filtroDataHistorico.ano
             ) {
 
                 if (!item.retirada) {
@@ -2458,12 +2993,28 @@ function obterQuantidadeFiltradaHistorico() {
                 }
 
 
-                if (
-                    mes &&
+                const dia =
+                    String(
+                        data.getDate()
+                    );
+
+
+                const mes =
                     String(
                         data.getMonth() + 1
-                    ) !==
-                        mes
+                    );
+
+
+                const ano =
+                    String(
+                        data.getFullYear()
+                    );
+
+
+                if (
+                    filtroDataHistorico.dia &&
+                    dia !==
+                        filtroDataHistorico.dia
                 ) {
 
                     return false;
@@ -2472,11 +3023,20 @@ function obterQuantidadeFiltradaHistorico() {
 
 
                 if (
-                    ano &&
-                    String(
-                        data.getFullYear()
-                    ) !==
-                        ano
+                    filtroDataHistorico.mes &&
+                    mes !==
+                        filtroDataHistorico.mes
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    filtroDataHistorico.ano &&
+                    ano !==
+                        filtroDataHistorico.ano
                 ) {
 
                     return false;
@@ -2495,86 +3055,7 @@ function obterQuantidadeFiltradaHistorico() {
 
 
 /* =========================================================
-   MOSTRAR TODOS / LIMPAR FILTROS
-========================================================= */
-
-function mostrarTodos() {
-
-    limparFiltrosHistorico();
-
-}
-
-
-/* =========================================================
-   LIMPAR FILTROS DO HISTÓRICO
-========================================================= */
-
-function limparFiltrosHistorico() {
-
-    const campo =
-        document.getElementById(
-            "buscaHistorico"
-        );
-
-
-    const status =
-        document.getElementById(
-            "filtroStatusHistorico"
-        );
-
-
-    const mes =
-        document.getElementById(
-            "filtroMesHistorico"
-        );
-
-
-    const ano =
-        document.getElementById(
-            "filtroAnoHistorico"
-        );
-
-
-    if (campo) {
-
-        campo.value = "";
-
-    }
-
-
-    if (status) {
-
-        status.value = "";
-
-    }
-
-
-    if (mes) {
-
-        mes.value = "";
-
-    }
-
-
-    if (ano) {
-
-        ano.value = "";
-
-    }
-
-
-    paginaHistoricoAtual = 1;
-
-
-    carregarHistorico(
-        true
-    );
-
-}
-
-
-/* =========================================================
-   SELECIONAR / DESELECIONAR REGISTRO
+   SELEÇÃO INDIVIDUAL
 ========================================================= */
 
 function alternarSelecaoRegistro(
@@ -2657,11 +3138,13 @@ function selecionarTodosHistorico(
 
     atualizarContadorSelecionados();
 
+    atualizarCheckboxSelecionarTodos();
+
 }
 
 
 /* =========================================================
-   ATUALIZAR CONTROLE DE SELEÇÃO
+   CONTROLE DE SELEÇÃO
 ========================================================= */
 
 function atualizarControleSelecaoHistorico(
@@ -2677,13 +3160,7 @@ function atualizarControleSelecaoHistorico(
 }
 
 
-/* =========================================================
-   ATUALIZAR CHECKBOX "SELECIONAR TODOS"
-========================================================= */
-
-function atualizarCheckboxSelecionarTodos(
-    listaPagina = null
-) {
+function atualizarCheckboxSelecionarTodos() {
 
     const checkboxTodos =
         document.getElementById(
@@ -2717,7 +3194,7 @@ function atualizarCheckboxSelecionarTodos(
     }
 
 
-    let selecionadosNaPagina =
+    let selecionados =
         0;
 
 
@@ -2728,7 +3205,7 @@ function atualizarCheckboxSelecionarTodos(
                 checkbox.checked
             ) {
 
-                selecionadosNaPagina++;
+                selecionados++;
 
             }
 
@@ -2737,20 +3214,20 @@ function atualizarCheckboxSelecionarTodos(
 
 
     checkboxTodos.checked =
-        selecionadosNaPagina ===
+        selecionados ===
         checkboxes.length;
 
 
     checkboxTodos.indeterminate =
-        selecionadosNaPagina > 0 &&
-        selecionadosNaPagina <
+        selecionados > 0 &&
+        selecionados <
             checkboxes.length;
 
 }
 
 
 /* =========================================================
-   CONTADOR DE SELECIONADOS
+   CONTADOR
 ========================================================= */
 
 function atualizarContadorSelecionados() {
@@ -2875,20 +3352,10 @@ async function excluirSelecionados() {
         );
 
 
-    ids.forEach(
-        id => {
-
-            registrosSelecionados.delete(
-                id
-            );
-
-        }
-    );
+    registrosSelecionados.clear();
 
 
     atualizarDashboard();
-
-    preencherAnosHistorico();
 
 
     const totalFiltrado =
@@ -2943,89 +3410,45 @@ function abrirEdicao(id) {
     if (!registro) return;
 
 
-    const editarId =
-        document.getElementById(
-            "editarId"
-        );
-
-
-    const editarLms =
-        document.getElementById(
-            "editarLms"
-        );
-
-
-    const editarNome =
-        document.getElementById(
-            "editarNome"
-        );
-
-
-    const editarCodigo =
-        document.getElementById(
-            "editarCodigo"
-        );
-
-
-    const editarStatus =
-        document.getElementById(
-            "editarStatus"
-        );
-
-
-    const editarObservacao =
-        document.getElementById(
-            "editarObservacao"
-        );
-
-
-    const modal =
-        document.getElementById(
-            "modalEdicao"
-        );
-
-
-    if (
-        !editarId ||
-        !editarLms ||
-        !editarNome ||
-        !editarCodigo ||
-        !editarStatus ||
-        !editarObservacao ||
-        !modal
-    ) {
-
-        return;
-
-    }
-
-
-    editarId.value =
+    document.getElementById(
+        "editarId"
+    ).value =
         registro.id;
 
 
-    editarLms.value =
+    document.getElementById(
+        "editarLms"
+    ).value =
         registro.lms;
 
 
-    editarNome.value =
+    document.getElementById(
+        "editarNome"
+    ).value =
         registro.nome;
 
 
-    editarCodigo.value =
+    document.getElementById(
+        "editarCodigo"
+    ).value =
         registro.codigo;
 
 
-    editarStatus.value =
+    document.getElementById(
+        "editarStatus"
+    ).value =
         registro.status;
 
 
-    editarObservacao.value =
-        registro.observacao ||
-        "";
+    document.getElementById(
+        "editarObservacao"
+    ).value =
+        registro.observacao || "";
 
 
-    modal.classList.add(
+    document.getElementById(
+        "modalEdicao"
+    ).classList.add(
         "aberto"
     );
 
@@ -3033,7 +3456,7 @@ function abrirEdicao(id) {
 
 
 /* =========================================================
-   SALVAR EDIÇÃO DO REGISTRO
+   SALVAR EDIÇÃO
 ========================================================= */
 
 async function salvarEdicao() {
@@ -3239,24 +3662,9 @@ async function salvarEdicao() {
             error
         );
 
-
-        if (
-            error.code ===
-            "23505"
-        ) {
-
-            alert(
-                "Este equipamento já está registrado como retirado."
-            );
-
-        }
-        else {
-
-            alert(
-                "Erro ao salvar as alterações."
-            );
-
-        }
+        alert(
+            "Erro ao salvar as alterações."
+        );
 
         return;
 
@@ -3287,15 +3695,13 @@ async function salvarEdicao() {
 
     atualizarDashboard();
 
-    preencherAnosHistorico();
-
     await carregarHistorico();
 
 }
 
 
 /* =========================================================
-   FECHAR MODAL DE REGISTRO
+   FECHAR MODAL REGISTRO
 ========================================================= */
 
 function fecharModal() {
@@ -3373,8 +3779,6 @@ async function excluirRegistro(id) {
 
     atualizarDashboard();
 
-    preencherAnosHistorico();
-
     await carregarHistorico();
 
 }
@@ -3397,55 +3801,27 @@ function abrirEdicaoColaborador(id) {
     if (!colaborador) return;
 
 
-    const campoId =
-        document.getElementById(
-            "editarColaboradorId"
-        );
-
-
-    const campoLms =
-        document.getElementById(
-            "editarColaboradorLms"
-        );
-
-
-    const campoNome =
-        document.getElementById(
-            "editarColaboradorNome"
-        );
-
-
-    const modal =
-        document.getElementById(
-            "modalColaborador"
-        );
-
-
-    if (
-        !campoId ||
-        !campoLms ||
-        !campoNome ||
-        !modal
-    ) {
-
-        return;
-
-    }
-
-
-    campoId.value =
+    document.getElementById(
+        "editarColaboradorId"
+    ).value =
         colaborador.id;
 
 
-    campoLms.value =
+    document.getElementById(
+        "editarColaboradorLms"
+    ).value =
         colaborador.lms;
 
 
-    campoNome.value =
+    document.getElementById(
+        "editarColaboradorNome"
+    ).value =
         colaborador.nome;
 
 
-    modal.classList.add(
+    document.getElementById(
+        "modalColaborador"
+    ).classList.add(
         "aberto"
     );
 
@@ -3453,7 +3829,7 @@ function abrirEdicaoColaborador(id) {
 
 
 /* =========================================================
-   SALVAR EDIÇÃO DO COLABORADOR
+   SALVAR COLABORADOR
 ========================================================= */
 
 async function salvarEdicaoColaborador() {
@@ -3574,9 +3950,7 @@ async function salvarEdicaoColaborador() {
     }
 
 
-    const {
-        error: erroRegistros
-    } = await db
+    await db
         .from("registros")
         .update({
 
@@ -3591,20 +3965,6 @@ async function salvarEdicaoColaborador() {
             "lms",
             lmsAntigo
         );
-
-
-    if (erroRegistros) {
-
-        console.error(
-            "Erro ao atualizar registros:",
-            erroRegistros
-        );
-
-        alert(
-            "O colaborador foi atualizado, mas ocorreu um erro ao atualizar os registros antigos."
-        );
-
-    }
 
 
     colaboradores =
@@ -3668,7 +4028,7 @@ async function salvarEdicaoColaborador() {
 
 
 /* =========================================================
-   FECHAR MODAL DE COLABORADOR
+   FECHAR MODAL COLABORADOR
 ========================================================= */
 
 function fecharModalColaborador() {
@@ -3764,7 +4124,7 @@ async function excluirColaborador(id) {
 
 
 /* =========================================================
-   FORMATAÇÃO DE STATUS
+   STATUS
 ========================================================= */
 
 function formatarStatus(
@@ -3794,7 +4154,7 @@ function formatarStatus(
 
 
 /* =========================================================
-   FORMATAÇÃO DE DATA
+   DATA
 ========================================================= */
 
 function formatarData(
@@ -3808,7 +4168,22 @@ function formatarData(
     }
 
 
-    return new Date(data)
+    const dataConvertida =
+        new Date(data);
+
+
+    if (
+        Number.isNaN(
+            dataConvertida.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
+
+
+    return dataConvertida
         .toLocaleString(
             "pt-BR",
             {
@@ -3835,7 +4210,7 @@ function formatarData(
 
 
 /* =========================================================
-   NORMALIZAÇÃO DE TEXTO
+   NORMALIZAÇÃO
 ========================================================= */
 
 function normalizarTexto(
@@ -3863,7 +4238,7 @@ function normalizarTexto(
 
 
 /* =========================================================
-   SEGURANÇA BÁSICA
+   SEGURANÇA
 ========================================================= */
 
 function escaparHTML(
@@ -3908,6 +4283,58 @@ function escaparHTML(
         );
 
 }
+
+
+/* =========================================================
+   FECHAR CALENDÁRIO AO CLICAR FORA
+========================================================= */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        const painel =
+            document.getElementById(
+                "painelFiltroDataHistorico"
+            );
+
+
+        const botao =
+            document.getElementById(
+                "btnFiltroDataHistorico"
+            );
+
+
+        if (
+            !painel ||
+            !botao
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            painel.classList.contains(
+                "aberto"
+            ) &&
+            !painel.contains(
+                event.target
+            ) &&
+            !botao.contains(
+                event.target
+            )
+        ) {
+
+            painel.classList.remove(
+                "aberto"
+            );
+
+        }
+
+    }
+);
 
 
 /* =========================================================
@@ -4000,7 +4427,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   INICIALIZAÇÃO DO SISTEMA
+   INICIALIZAÇÃO
 ========================================================= */
 
 document.addEventListener(
@@ -4052,5 +4479,5 @@ document.addEventListener(
 
 
 /* =========================================================
-   FIM DO SCRIPT
+   FIM
 ========================================================= */
