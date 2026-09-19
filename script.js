@@ -1775,7 +1775,7 @@ return String(texto)
 }
 
 /* =========================================================
-   ENTER - REGISTRAR RETIRADA
+   ENTER - REGISTRAR RETIRADA PELO LEITOR 2D
 ========================================================= */
 
 document.addEventListener(
@@ -1797,10 +1797,7 @@ document.addEventListener(
 
         if (
             elemento &&
-            (
-                elemento.id === "lms" ||
-                elemento.id === "codigo"
-            )
+            elemento.id === "codigo"
         ) {
 
             if (event.key === "Enter") {
@@ -1815,6 +1812,7 @@ document.addEventListener(
 
     }
 );
+
 
 
 
