@@ -1845,26 +1845,40 @@ document.addEventListener(
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+  "DOMContentLoaded",
+  async function () {
 
-    console.log("Site carregado.");
+    console.log(
+      "Sistema de Controle de Equipamentos iniciado."
+    );
+
+
+    registrarEventosFormularios();
+
+    registrarEventosBusca();
+
+    registrarEventosFiltrosQuebrados();
+
 
     try {
 
-        await carregarDados();
+      await carregarDados();
 
-        console.log("Dados carregados com sucesso.");
+      preencherAnos();
 
-    } catch (erro) {
+      atualizarDashboard();
 
-        console.error(
-            "Erro durante a inicialização:",
-            erro
-        );
+    } catch (error) {
+
+      console.error(
+        "Falha na inicialização:",
+        error
+      );
 
     }
-
-});
+  }
+);
 
 /* =========================================================
    EXPOSIÇÃO DAS FUNÇÕES NO WINDOW
