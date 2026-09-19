@@ -348,65 +348,66 @@ BUSCAR NOME POR LMS
 
 function buscarNomePorLms() {
 
-    const campoLms =
-        document.getElementById("lms");
+const campoLms = document
+    .getElementById("lms");
 
-    const campoNome =
-        document.getElementById("nome");
+const campoNome = document
+    .getElementById("nome");
 
-    const campoCodigo =
-        document.getElementById("codigo");
+const status = document
+    .getElementById("statusLms");
 
-    const status =
-        document.getElementById("statusLms");
+const lms = campoLms
+    .value
+    .trim()
+    .toLowerCase();
 
-    const lms =
-        campoLms.value.trim().toLowerCase();
+campoNome.value = "";
 
-    campoNome.value = "";
+status.textContent = "";
 
-    status.textContent = "";
+status.className = "status-lms";
 
-    status.className = "status-lms";
+if (!lms) {
 
-    if (!lms) {
-        return;
-    }
+    return;
+}
 
-    const colaborador = colaboradores.find(
-        item =>
-            item.lms.toLowerCase() === lms
+const colaborador = colaboradores.find(
+    item =>
+        item.lms.toLowerCase() === lms
+);
+
+if (colaborador) {
+
+    campoNome.value =
+        colaborador.nome;
+
+    status.textContent =
+        "Colaborador encontrado";
+
+    status.classList.add(
+        "sucesso"
     );
 
-    if (colaborador) {
-
-        campoNome.value =
-            colaborador.nome;
-
-        status.textContent =
-            "Colaborador encontrado";
-
-        status.classList.add(
-            "sucesso"
-        );
-
-        // Quando encontrar o LMS,
-        // prepara o próximo campo.
-        campoCodigo.focus();
-
-    } else {
-
-        status.textContent =
-            "LMS não cadastrado";
-
-        status.classList.add(
-            "erro"
-        );
-
-    }
+    // Vai automaticamente para o código do equipamento
+    document.getElementById("codigo").focus();
 
 }
 
+
+} else {
+
+    status.textContent =
+        "LMS não cadastrado";
+
+    status.classList.add(
+        "erro"
+    );
+
+}
+
+}
 
 /* =========================================================
 REGISTRAR RETIRADA
@@ -1819,86 +1820,6 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   ENTER - LEITOR 2D
-   FLUXO:
-
-   LMS + ENTER
-   → ignora ENTER
-   → vai para código
-
-   CÓDIGO + ENTER
-   → registra retirada
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        const paginaRetirada =
-            document.getElementById("retirada");
-
-        if (
-            !paginaRetirada ||
-            !paginaRetirada.classList.contains("active")
-        ) {
-            return;
-        }
-
-        const elemento =
-            document.activeElement;
-
-
-        /* =====================================================
-           ENTER NO LMS
-           ===================================================== */
-
-        if (
-            elemento &&
-            elemento.id === "lms" &&
-            event.key === "Enter"
-        ) {
-
-            event.preventDefault();
-
-            const campoCodigo =
-                document.getElementById("codigo");
-
-            const campoNome =
-                document.getElementById("nome");
-
-            // Só avança se o LMS foi reconhecido
-            if (
-                campoNome.value.trim() !== ""
-            ) {
-
-                campoCodigo.focus();
-
-            }
-
-            return;
-        }
-
-
-        /* =====================================================
-           ENTER NO CÓDIGO
-           ===================================================== */
-
-        if (
-            elemento &&
-            elemento.id === "codigo" &&
-            event.key === "Enter"
-        ) {
-
-            event.preventDefault();
-
-            registrarRetirada();
-
-            return;
-        }
-
-    }
-);
 
 
 /* =========================================================
