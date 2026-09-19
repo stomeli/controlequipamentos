@@ -575,7 +575,62 @@ async function registrarRetirada() {
        ATUALIZAR DASHBOARD
     ===================================================== */
 
-    atualizarDashboard();
+    function atualizarDashboard() {
+
+    const retirados = registros.filter(
+        item => item.status === "retirado"
+    ).length;
+
+    const devolvidos = registros.filter(
+        item => item.status === "devolvido"
+    ).length;
+
+    const extraviados = registros.filter(
+        item => item.status === "extraviado"
+    ).length;
+
+
+    const totalRetirados =
+        document.getElementById("totalRetirados");
+
+    const totalDevolvidos =
+        document.getElementById("totalDevolvidos");
+
+    const totalExtraviados =
+        document.getElementById("totalExtraviados");
+
+
+    if (totalRetirados) {
+
+        totalRetirados.textContent =
+            retirados;
+
+    }
+
+
+    if (totalDevolvidos) {
+
+        totalDevolvidos.textContent =
+            devolvidos;
+
+    }
+
+
+    if (totalExtraviados) {
+
+        totalExtraviados.textContent =
+            extraviados;
+
+    }
+
+
+    console.log("Dashboard:", {
+        retirados,
+        devolvidos,
+        extraviados
+    });
+}
+
 
 
     /* =====================================================
