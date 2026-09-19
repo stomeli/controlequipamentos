@@ -1785,7 +1785,6 @@ document.addEventListener(
         const paginaRetirada =
             document.getElementById("retirada");
 
-
         if (
             !paginaRetirada ||
             !paginaRetirada.classList.contains("active")
@@ -1793,17 +1792,14 @@ document.addEventListener(
             return;
         }
 
-
         const elemento =
             document.activeElement;
-
 
         if (
             elemento &&
             (
                 elemento.id === "lms" ||
-                elemento.id === "codigo" ||
-            
+                elemento.id === "codigo"
             )
         ) {
 
@@ -1819,6 +1815,7 @@ document.addEventListener(
 
     }
 );
+
 
 
 /* =========================================================
