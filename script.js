@@ -1766,6 +1766,54 @@ return String(texto)
 }
 
 /* =========================================================
+   ENTER - REGISTRAR RETIRADA
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        const paginaRetirada =
+            document.getElementById("retirada");
+
+
+        if (
+            !paginaRetirada ||
+            !paginaRetirada.classList.contains("active")
+        ) {
+            return;
+        }
+
+
+        const elemento =
+            document.activeElement;
+
+
+        if (
+            elemento &&
+            (
+                elemento.id === "lms" ||
+                elemento.id === "nome" ||
+                elemento.id === "codigo" ||
+                elemento.id === "observacao"
+            )
+        ) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                registrarRetirada();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
 INICIALIZAÇÃO
 ========================================================= */
 
