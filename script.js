@@ -3,7 +3,7 @@ SUPABASE
 ========================================================= */
 
 const SUPABASE_URL = "URL_DO_NOVO_PROJETO";
-const SUPABASE_ANON_KEY = "CHAVE_PUBLICA_DO_NOVO_PROJETO";
+const SUPABASE_ANON_KEY = "sb_publishable_IV8xYF0qDVVYAxhSgSjqtg_mreIReGf";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
