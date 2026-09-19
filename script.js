@@ -1865,7 +1865,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 });
-
-
-    }
-);
