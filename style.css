@@ -652,3 +652,15 @@ td {
     }
 
 }
+
+/* ================================
+   FILTRO DE DATA DO HISTÓRICO
+================================ */
+
+.painel-filtro-data {
+    display: none;
+}
+
+.painel-filtro-data.aberto {
+    display: block;
+}
