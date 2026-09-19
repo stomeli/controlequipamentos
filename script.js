@@ -73,7 +73,6 @@ async function carregarDados() {
         }
 
         registros = dadosRegistros || [];
-
         colaboradores = dadosColaboradores || [];
 
         console.log("Registros:", registros);
@@ -90,28 +89,11 @@ async function carregarDados() {
             erro
         );
 
-        return;
-
     }
 
-registros = dadosRegistros || [];
-    colaboradores = dadosColaboradores || [];
-
-    console.log("Registros:", registros);
-    console.log("Colaboradores:", colaboradores);
-
-    atualizarDashboard();
-
-    console.log("Dashboard atualizado.");
-
-} catch (erro) {
-
-    console.error(
-        "Erro inesperado ao carregar dados:",
-        erro
-    );
-
 }
+
+
 /* =========================================================
 NAVEGAÇÃO
 ========================================================= */
