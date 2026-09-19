@@ -344,24 +344,25 @@
 
             <div class="campo">
 
-                <label for="lms">
-                    LMS do colaborador
-                </label>
+    <label for="lms">
+        LMS do colaborador
+    </label>
 
-                <input
-                    type="text"
-                    id="lms"
-                    placeholder="Digite o LMS"
-                    oninput="buscarNomePorLms()"
-                    autocomplete="off"
-                >
+    <input
+        type="text"
+        id="lms"
+        placeholder="Digite o LMS"
+        oninput="buscarNomePorLms()"
+        onkeydown="if (event.key === 'Enter') { event.preventDefault(); buscarNomePorLms(); }"
+        autocomplete="off"
+    >
 
-                <small
-                    id="statusLms"
-                    class="status-lms"
-                ></small>
+    <small
+        id="statusLms"
+        class="status-lms"
+    ></small>
 
-            </div>
+</div>
 
 
             <div class="campo">
