@@ -1865,3 +1865,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 });
+
+/* =========================================================
+   EXPOSIÇÃO DAS FUNÇÕES NO WINDOW
+   ========================================================= */
+
+window.showPage =
+  showPage;
+
+window.toggleMenu =
+  toggleMenu;
+
+window.adicionarEquipamento =
+  adicionarEquipamento;
+
+window.adicionarQuebrado =
+  adicionarQuebrado;
+
+window.editarEquipamento =
+  editarEquipamento;
+
+window.excluirEquipamento =
+  excluirEquipamento;
+
+window.editarRegistroQuebrado =
+  editarRegistroQuebrado;
+
+window.excluirRegistroQuebrado =
+  excluirRegistroQuebrado;
+
+window.fecharModal =
+  fecharModal;
+
+window.mudarPagina =
+  mudarPagina;
+
+window.limparFiltrosQuebrados =
+  limparFiltrosQuebrados;
+
+
+
+
+/* =========================================================
+   FIM DO SCRIPT
+   ========================================================= */
