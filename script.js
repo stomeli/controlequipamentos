@@ -1802,9 +1802,8 @@ document.addEventListener(
             elemento &&
             (
                 elemento.id === "lms" ||
-                elemento.id === "nome" ||
                 elemento.id === "codigo" ||
-                elemento.id === "observacao"
+            
             )
         ) {
 
